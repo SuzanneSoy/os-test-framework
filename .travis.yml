@@ -5,9 +5,19 @@ addons:
     packages:
       - qemu
       - qemu-system-x86
+      - qemu-system-arm
+      - virtualbox
+      - bochs
+      - sikuli-ide
 
 install:
   - true # Nothing to do for now.
 
+env:
+  - MODE=qemu-system-i386
+  - MODE=qemu-system-arm
+  - MODE=virtualbox
+  - MODE=bochs
+
 script:
-  - ./test_os.sh qemu-system-i386  
+  - ./test/${MODE}.sh
