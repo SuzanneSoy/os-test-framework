@@ -1,0 +1,13 @@
+language: c
+sudo: false
+addons:
+  apt:
+    packages:
+      - qemu
+      - qemu-system-x86
+
+install:
+  - true # Nothing to do for now.
+
+script:
+  - ./test_os.sh qemu-system-i386  
