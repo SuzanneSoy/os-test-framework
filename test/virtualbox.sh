@@ -1,4 +1,7 @@
 #!/bin/sh
 set -e
 
-VirtualBox --help
+ls /usr/bin | grep -i virtualbox || true
+ls /usr/bin | grep -i vboxmanage || true
+virtualbox --help
+VBoxManage --help
