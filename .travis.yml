@@ -16,6 +16,8 @@ addons:
       - libjna-java
       - libcommons-cli-java
       - libjson-simple-java
+      - libdc1394-22
+      - libdc1394-22-dev
       # example-os build dependencies:
       - nasm
 
