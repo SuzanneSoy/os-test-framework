@@ -9,9 +9,15 @@ addons:
       - virtualbox
       - bochs
       - sikuli-ide
+      # Missing dependencies for sikuli-ide
+      - libantlr3-runtime-java
+      - libcommons-cli-java
+      - libjson-simple-java
 
 install:
-  - true # Nothing to do for now.
+  # The sikuli-ide packaged with ubuntu 16.04 does not seem to work correctly: missing dependencies, some dependencies are too recent, …
+  - wget https://launchpadlibrarian.net/359997648/sikulixsetup-1.1.2.jar -O ~/sikulix/sikulixsetup-1.1.2.jar
+  - (cd ~/sikulix && java -jar sikulixsetup-1.1.2.jar options 1 1.1)
 
 env:
   - MODE=qemu-system-i386
@@ -20,4 +26,5 @@ env:
   - MODE=bochs
 
 script:
-  - ./test/${MODE}.sh
+  - (cd example-os && make)
+  - xvfb-run ./test/${MODE}.sh
