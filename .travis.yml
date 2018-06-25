@@ -18,6 +18,7 @@ addons:
       - libjson-simple-java
       - libdc1394-22
       - libdc1394-22-dev
+      - wmctrl
       # example-os build dependencies:
       - nasm
 
