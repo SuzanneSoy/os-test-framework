@@ -16,6 +16,8 @@ addons:
       - libjna-java
       - libcommons-cli-java
       - libjson-simple-java
+      # example-os build dependencies:
+      - nasm
 
 install:
   # The sikuli-ide packaged with ubuntu 16.04 does not seem to work correctly: missing dependencies, some dependencies are too recent, …
