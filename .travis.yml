@@ -10,12 +10,16 @@ addons:
       - bochs
       - sikuli-ide
       # Missing dependencies for sikuli-ide
-      - libantlr3-runtime-java
+      #- libantlr3-runtime-java # on 16.04
+      - antlr3 # on 14.04
+      #- jaffl-java # unavailable on Travis
+      - libjna-java
       - libcommons-cli-java
       - libjson-simple-java
 
 install:
   # The sikuli-ide packaged with ubuntu 16.04 does not seem to work correctly: missing dependencies, some dependencies are too recent, …
+  - mkdir ~/sikulix/
   - wget https://launchpadlibrarian.net/359997648/sikulixsetup-1.1.2.jar -O ~/sikulix/sikulixsetup-1.1.2.jar
   - (cd ~/sikulix && java -jar sikulixsetup-1.1.2.jar options 1 1.1)
 
