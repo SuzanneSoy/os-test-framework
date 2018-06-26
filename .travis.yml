@@ -27,6 +27,7 @@ install:
   - mkdir ~/sikulix/
   - wget https://launchpadlibrarian.net/359997648/sikulixsetup-1.1.2.jar -O ~/sikulix/sikulixsetup-1.1.2.jar
   - (cd ~/sikulix && java -jar sikulixsetup-1.1.2.jar options 1 1.1)
+  - export PATH="$HOME/sikulix/:$PATH"
 
 env:
   - MODE=qemu-system-i386
