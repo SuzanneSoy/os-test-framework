@@ -37,4 +37,4 @@ env:
 
 script:
   - (cd example-os && make)
-  - xvfb-run ./test/${MODE}.sh
+  - xvfb-run -a ./test/${MODE}.sh
