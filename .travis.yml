@@ -7,7 +7,7 @@ addons:
       - qemu-system-x86
       - qemu-system-arm
       - virtualbox
-      - bochs-x
+      - bochs-sdl
       - sikuli-ide
       # Missing dependencies for sikuli-ide
       #- libantlr3-runtime-java # on 16.04

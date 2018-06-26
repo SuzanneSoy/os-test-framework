@@ -7,6 +7,7 @@ bochsrc="$(tempfile)"
 cat > "$bochsrc" <<EOF
 floppya: 1_44=${os_file}, status=inserted
 boot: floppy
+display_library: sdl
 EOF
 
 bochscontinue="$(tempfile)"
