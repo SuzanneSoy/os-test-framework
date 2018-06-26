@@ -3,6 +3,7 @@ sudo: false
 addons:
   apt:
     packages:
+      - scrot
       - qemu
       - qemu-system-x86
       - qemu-system-arm
