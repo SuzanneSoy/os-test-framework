@@ -8,6 +8,9 @@ vmname="automatic-os-test-$(date +%s)-$$"
 
 ln -sf "$(readlink -f "$os_file")" "$img_file"
 VBoxManage createvm --name "$vmname" --register --basefolder "/tmp/$vbox_dir"
+VBoxManage modifyvm "$vmname" --hwvirtex off
+VBoxManage modifyvm "$vmname" --nestedpaging off
+VBoxManage modifyvm "$vmname" --pae off
 VBoxManage storagectl "$vmname" --name 'floppy disk drive' --add floppy --bootable on
 VBoxManage storageattach "$vmname" --storagectl 'floppy disk drive' --port 0 --device 0 --type fdd --medium "$img_file"
 VBoxManage modifyvm "$vmname" --boot1 floppy
