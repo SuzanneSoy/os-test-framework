@@ -11,7 +11,7 @@ VBoxManage createvm --name "$vmname" --register --basefolder "/tmp/$vbox_dir"
 VBoxManage storagectl "$vmname" --name 'floppy disk drive' --add floppy --bootable on
 VBoxManage storageattach "$vmname" --storagectl 'floppy disk drive' --port 0 --device 0 --type fdd --medium "$img_file"
 VBoxManage modifyvm "$vmname" --boot1 floppy
-VBoxManage startvm "$vmname" --type gui &
+VBoxManage startvm "$vmname" --type sdl &
 pid=$!
 runsikulix -r test/check-gradient.sikuli
 VBoxManage controlvm "$vmname" poweroff
