@@ -16,4 +16,7 @@ echo "continue" > "$bochscontinue"
 bochs -qf "$bochsrc" < "$bochscontinue" &
 pid=$!
 runsikulix -r test/check-gradient.sikuli
+
+ansi-screenshots/ansi_screenshot.sh
+
 kill $pid

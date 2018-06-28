@@ -17,6 +17,9 @@ VBoxManage modifyvm "$vmname" --boot1 floppy
 VBoxManage startvm "$vmname" --type sdl &
 pid=$!
 runsikulix -r test/check-gradient.sikuli
+
+ansi-screenshots/ansi_screenshot.sh
+
 VBoxManage controlvm "$vmname" poweroff
 wait $pid
 # TODO: should ensure that the cleanup phase is always done even if the test fails.
