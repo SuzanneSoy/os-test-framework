@@ -28,6 +28,5 @@ done
  | sed -n -r -e 's/^[0-9a-f]*  (([0-9a-f]{2} ){8}) (([0-9a-f]{2} ){7}[0-9a-f]{2}).*$/\1\3/p' \
  | tr '\n' ' ' \
  | fold -w $((width*3)) \
- | sed -r -e 's/([01])([0-7]) /[\1;3\2m█/g'
-
-echo
+ | sed -r -e 's/([01])([0-7]) /[\1;3\2m█/g' \
+ | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while read ab; do echo "$ab"; sleep 0.05; done; else cat; echo; fi
