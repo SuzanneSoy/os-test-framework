@@ -40,4 +40,4 @@ paste "$odd_lines_px" "$even_lines_px" \
  | tr '\t\n' '  ' \
  | fold -w $((width*6)) \
  | sed -r -e 's/([01])([0-7]) ([01])([0-7]) /[\1;3\2;4\4m▀/g' -e 's/$/[m/' \
- | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while read ab; do echo "$ab"; sleep 0.05; done; else cat; echo; fi
+ | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while read ab; do echo "$ab"; sleep 0.1; done; else cat; echo; fi
