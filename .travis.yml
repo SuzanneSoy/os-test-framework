@@ -2,12 +2,16 @@ language: c
 addons:
   apt:
     packages:
+      # graphical environment
       - scrot
+      - fluxbox
+      # emulators
       - qemu
       - qemu-system-x86
       - qemu-system-arm
       #- virtualbox
       - bochs-sdl
+      # automated GUI testing
       - sikuli-ide
       # Missing dependencies for sikuli-ide
       #- libantlr3-runtime-java # on 16.04
@@ -49,4 +53,4 @@ install:
 
 script:
   - (cd example-os && make)
-  - xvfb-run -a ./test/${MODE}.sh
+  - ./utils/gui-wrapper.sh ./test/${MODE}.sh

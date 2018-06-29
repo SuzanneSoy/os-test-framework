@@ -18,7 +18,7 @@ VBoxManage startvm "$vmname" --type sdl &
 pid=$!
 runsikulix -r test/check-gradient.sikuli
 
-ansi-screenshots/ansi_screenshot.sh
+./utils/take-screenshots.sh "$(basename "$0" .sh).png"
 
 VBoxManage controlvm "$vmname" poweroff
 wait $pid

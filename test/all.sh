@@ -1,4 +1,4 @@
-xvfb-run ./test/qemu-system-i386.sh
-xvfb-run ./test/qemu-system-arm.sh
-xvfb-run ./test/virtualbox.sh
-xvfb-run ./test/bochs.sh
+./utils/gui-wrapper.sh ./test/qemu-system-i386.sh
+./utils/gui-wrapper.sh ./test/qemu-system-arm.sh
+./utils/gui-wrapper.sh ./test/virtualbox.sh
+./utils/gui-wrapper.sh ./test/bochs.sh
