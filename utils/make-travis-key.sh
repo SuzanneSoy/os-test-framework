@@ -38,7 +38,7 @@ fi
 
 ssh_dir="$(mktemp -d --suffix=travis-deploy-ssh-keygen)"
 mkdir -m 700 "${ssh_dir}/permissions/"
-ssh-keygen -N '' -f "${ssh_dir}/permissions/id_rsa"
+ssh-keygen -N '' -f "${ssh_dir}/permissions/travis-deploy-key-id_rsa"
 
 if test "$(git remote get-url origin)" != "${built_repo}"; then
     echo "ERROR: The url of the remote \"origin\" in the current repository is"
@@ -50,10 +50,10 @@ if test "$(git remote get-url origin)" != "${built_repo}"; then
 fi
 
 travis login
-travis encrypt-file "${ssh_dir}/permissions/id_rsa.pub"
-git add "id_rsa.pub.enc"
+travis encrypt-file "${ssh_dir}/permissions/travis-deploy-key-id_rsa"
+git add "travis-deploy-key-id_rsa.enc"
 
 printf "\033[1;32mNow copy the following public SSH key and add it as a\033[m\n"
 printf "\033[1;32mread-write deploy key for the repository \033[1;33m${deploy_repo}\033[1;32m on GitHub.\033[m\n"
-cat "${ssh_dir}/permissions/id_rsa.pub"
+cat "${ssh_dir}/permissions/travis-deploy-key-id_rsa.pub"
 rm -fr "${ssh_dir}"
