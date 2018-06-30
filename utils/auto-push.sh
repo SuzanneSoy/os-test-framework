@@ -15,7 +15,7 @@ usage() {
 if test "$#" -eq 1 && test "$1" = "-h" -o "$1" = "--help"; then
   usage
   exit 0
-elif test "$#" -ne 5; then
+elif test "$#" -ne 6; then
   usage
   exit 1
 fi
@@ -23,9 +23,9 @@ fi
 official_repo="$1"      # https://github.com/user/repo.git
 deploy_repo="$2"        # git@github.com:user/repo.git
 deploy_branch="$3"      # gh-pages
-deploy_base_commit="$3" # branch name or tag
-key_iv_id="$4"          # 123456789abc, part of encrypted_123456789abc_key and encrypted_123456789abc_iv
-deploy_directory="$5"   # directory to copy on top of deploy_base_commit
+deploy_base_commit="$4" # branch name or tag
+key_iv_id="$5"          # 123456789abc, part of encrypted_123456789abc_key and encrypted_123456789abc_iv
+deploy_directory="$6"   # directory to copy on top of deploy_base_commit
 key_env_var_name="encrypted_${key_iv_id}_key"
 iv_env_var_name="encrypted_${key_iv_id}_key"
 key="${!key_env_var_name}"
