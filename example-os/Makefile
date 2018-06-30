@@ -1,10 +1,10 @@
 .PHONY: all
-all: os.sh deploy-screenshots
+all: os.sh
 
 ../deploy-screenshots:
 	mkdir $@
 
-os.sh: os.asm Makefile
+os.sh: os.asm ../deploy-screenshots Makefile
 	nasm -o $@ $<
 	chmod a+x $@
 
