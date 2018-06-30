@@ -20,3 +20,5 @@ runsikulix -r test/check-gradient.sikuli
 ./utils/take-screenshots.sh "$(basename "$0" .sh).png"
 
 kill $pid
+
+rm "${bochsrc}" "${bochscontinue}"

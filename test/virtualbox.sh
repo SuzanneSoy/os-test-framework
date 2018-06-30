@@ -3,11 +3,11 @@ set -e
 
 os_file="example-os/os.sh"
 img_file="$(mktemp --suffix=".img")"
-vbox_dir="vbox_$(date +%s)-$$"
+vbox_dir="$(mktemp -d --prefix vbox_)"
 vmname="automatic-os-test-$(date +%s)-$$"
 
 ln -sf "$(readlink -f "$os_file")" "$img_file"
-VBoxManage createvm --name "$vmname" --register --basefolder "/tmp/$vbox_dir"
+VBoxManage createvm --name "$vmname" --register --basefolder "$vbox_dir"
 VBoxManage modifyvm "$vmname" --hwvirtex off
 VBoxManage modifyvm "$vmname" --nestedpaging off
 VBoxManage modifyvm "$vmname" --pae off
@@ -29,5 +29,7 @@ for i in `seq 10`; do
     fi
     sleep 0.1
 done
+
+# Cleanup: remove temporary files and directories.
 rm "$img_file"
 rm "/tmp/$vbox_dir" -fr

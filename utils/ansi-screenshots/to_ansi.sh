@@ -42,3 +42,5 @@ paste "$odd_lines_px" "$even_lines_px" \
  | sed -r -e 's/([01])([0-7]) ([01])([0-7]) /[\1;3\2;4\4m▀/g' -e 's/$/[m/' \
  | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while IFS=$'\n' read -n 11 ab; do if test "${#ab}" -ne 11; then echo "$ab"; else echo -n "$ab"; fi; sleep 0.01; done; else cat; fi
 echo
+
+rm "${mini_png}" "${colors_gif}" "${indexed_gif}" "${indexed_pgm}" "${odd_lines}" "${even_lines}" "${odd_lines_px}" "${even_lines_px}"
