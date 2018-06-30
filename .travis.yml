@@ -54,3 +54,10 @@ install:
 script:
   - (cd example-os && make)
   - ./utils/gui-wrapper.sh ./test/${MODE}.sh
+  - |
+    ./utils/auto-push.sh "https://github.com/jsmaniac/travis-os.git" \
+                         "git@github.com:jsmaniac/travis-os-deploy-artifacts.git" \
+                         "master" \
+                         "deploy-base" \
+                         "edf345aad47e" \
+                         "deploy-screenshots"

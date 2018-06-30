@@ -17,7 +17,7 @@ bochs -qf "$bochsrc" < "$bochscontinue" &
 pid=$!
 runsikulix -r test/check-gradient.sikuli
 
-./utils/take-screenshots.sh "$(basename "$0" .sh).png"
+./utils/take-screenshots.sh "./deploy-screenshots/$(basename "$0" .sh).png"
 
 kill $pid
 

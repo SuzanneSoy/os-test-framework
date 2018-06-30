@@ -1,24 +1,28 @@
 .PHONY: all
-all: os.sh
+all: os.sh deploy-screenshots
+
+../deploy-screenshots:
+	mkdir $@
 
 os.sh: os.asm Makefile
 	nasm -o $@ $<
 	chmod a+x $@
 
 .PHONY: test
-test: test-qemu-system-i386 test-qemu-system-arm test-virtualbox test-bochs
+test: test-qemu-system-i386 test-qemu-system-arm test-virtualbox test-bochs Makefile
 
 .PHONY: test-qemu-system-i386
-test-qemu-system-i386:
+test-qemu-system-i386: os.sh ../deploy-screenshots Makefile
 	(cd .. && xvfb-run -a ./test/qemu-system-i386.sh)
 
 .PHONY: test-qemu-system-arm
-test-qemu-system-arm:
+test-qemu-system-arm: os.sh ../deploy-screenshots Makefile
 	(cd .. && xvfb-run -a ./test/qemu-system-arm.sh)
 
 .PHONY: test-virtualbox
-test-virtualbox:
+test-virtualbox: os.sh ../deploy-screenshots Makefile
 	(cd .. && xvfb-run -a ./test/virtualbox.sh)
 
 .PHONY: test-bochs
+test-bochs: os.sh ../deploy-screenshots Makefile
 	(cd .. && xvfb-run -a ./test/bochs.sh)

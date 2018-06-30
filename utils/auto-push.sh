@@ -2,6 +2,24 @@
 set -e
 set +x
 
+usage() {
+  echo "Usage: $0 official_repo deploy_repo deploy_branch deploy_base_commit key_iv_id deploy_directory"
+  echo "official_repo:       https://github.com/user/repo.git"
+  echo "deploy_repo:         git@github.com:user/repo.git"
+  echo "deploy_branch:       gh-pages"
+  echo "deploy_base_commit:  branch name or tag"
+  echo "key_iv_id:           123456789abc, part of encrypted_123456789abc_key and encrypted_123456789abc_iv"
+  echo "deploy_directory:    directory to copy on top of deploy_base_commit"
+}
+
+if test "$#" -eq 1 && test "$1" = "-h" -o "$1" = "--help"; then
+  usage
+  exit 0
+elif test "$#" -ne 5; then
+  usage
+  exit 1
+fi
+
 official_repo="$1"      # https://github.com/user/repo.git
 deploy_repo="$2"        # git@github.com:user/repo.git
 deploy_branch="$3"      # gh-pages
