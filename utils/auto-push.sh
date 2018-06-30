@@ -28,8 +28,8 @@ key_iv_id="$5"          # 123456789abc, part of encrypted_123456789abc_key and e
 deploy_directory="$6"   # directory to copy on top of deploy_base_commit
 key_env_var_name="encrypted_${key_iv_id}_key"
 iv_env_var_name="encrypted_${key_iv_id}_key"
-key="${!key_env_var_name}"
-iv="${!iv_env_var_name}"
+key="$(sh -c 'echo "${'"$key_env_var_name"'}"')"
+iv="$(sh -c 'echo "${'"$iv_env_var_name"'}"')"
 
 if test "$(git config remote.origin.url)" != "$official_repo"; then
   echo "Not on official repo, will not deploy to ${deploy_repo}:${deploy_branch}."
