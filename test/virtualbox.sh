@@ -3,7 +3,7 @@ set -e
 
 os_file="example-os/os.sh"
 img_file="$(mktemp --suffix=".img")"
-vbox_dir="$(mktemp -d --prefix vbox_)"
+vbox_dir="$(mktemp -d --suffix="_vbox")"
 vmname="automatic-os-test-$(date +%s)-$$"
 
 ln -sf "$(readlink -f "$os_file")" "$img_file"
