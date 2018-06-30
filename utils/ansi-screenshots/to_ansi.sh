@@ -3,14 +3,14 @@
 file="$1"
 width="$2"
 
-mini_png="$(tempfile --suffix=".png")"
-colors_gif="$(tempfile --suffix=".gif")"
-indexed_gif="$(tempfile --suffix=".gif")"
-indexed_pgm="$(tempfile --suffix=".pgm")"
-odd_lines="$(tempfile --suffix=".odd")"
-even_lines="$(tempfile --suffix=".even")"
-odd_lines_px="$(tempfile --suffix=".odd.px")"
-even_lines_px="$(tempfile --suffix=".even.px")"
+mini_png="$(mktemp --suffix=".png")"
+colors_gif="$(mktemp --suffix=".gif")"
+indexed_gif="$(mktemp --suffix=".gif")"
+indexed_pgm="$(mktemp --suffix=".pgm")"
+odd_lines="$(mktemp --suffix=".odd")"
+even_lines="$(mktemp --suffix=".even")"
+odd_lines_px="$(mktemp --suffix=".odd.px")"
+even_lines_px="$(mktemp --suffix=".even.px")"
 
 colors=(78,78,78 255,108,96 0,170,0 288,288,182 150,203,254 255,115,253 85,255,255 238,238,238 124,124,124 255,155,147 177,253,121 255,255,145 181,220,254 255,156,254 85,255,255 255,255,255)
 args=()

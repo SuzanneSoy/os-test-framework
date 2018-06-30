@@ -3,14 +3,14 @@ set -e
 
 os_file="example-os/os.sh"
 
-bochsrc="$(tempfile)"
+bochsrc="$(mktemp)"
 cat > "$bochsrc" <<EOF
 floppya: 1_44=${os_file}, status=inserted
 boot: floppy
 display_library: sdl
 EOF
 
-bochscontinue="$(tempfile)"
+bochscontinue="$(mktemp)"
 echo "continue" > "$bochscontinue"
 
 bochs -qf "$bochsrc" < "$bochscontinue" &

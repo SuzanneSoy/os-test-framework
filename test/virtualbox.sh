@@ -2,7 +2,7 @@
 set -e
 
 os_file="example-os/os.sh"
-img_file="$(tempfile --suffix=".img")"
+img_file="$(mktemp --suffix=".img")"
 vbox_dir="vbox_$(date +%s)-$$"
 vmname="automatic-os-test-$(date +%s)-$$"
 
