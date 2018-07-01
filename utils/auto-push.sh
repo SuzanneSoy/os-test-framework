@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-set +x
+set +x # do not display any command, as they could contain the Travis openssl key and IV.
 
 usage() {
   echo "Usage: $0 official_repo deploy_repo deploy_branch deploy_base_commit key_iv_id deploy_directory"
@@ -27,7 +27,7 @@ deploy_base_commit="$4" # branch name or tag
 key_iv_id="$5"          # 123456789abc, part of encrypted_123456789abc_key and encrypted_123456789abc_iv
 deploy_directory="$6"   # directory to copy on top of deploy_base_commit
 key_env_var_name="encrypted_${key_iv_id}_key"
-iv_env_var_name="encrypted_${key_iv_id}_key"
+iv_env_var_name="encrypted_${key_iv_id}_iv"
 key="$(sh -c 'echo "${'"$key_env_var_name"'}"')"
 iv="$(sh -c 'echo "${'"$iv_env_var_name"'}"')"
 
@@ -42,7 +42,6 @@ elif test -z "${key:-}" -o -z "${iv:-}"; then
 elif test ! -e travis-deploy-key-id_rsa.enc; then
   echo "travis-deploy-key-id_rsa.enc not present, will not deploy to ${deploy_repo}:${deploy_branch}."
 else
-  set -x
   echo "Automatic push to ${deploy_repo}:${deploy_branch}"
 
   # Git configuration:
@@ -52,7 +51,6 @@ else
   # SSH configuration
   mkdir -p ~/.ssh
   chmod 700 ~/.ssh
-  set +x
   if openssl aes-256-cbc -K "$key" -iv "$iv" -in travis-deploy-key-id_rsa.enc -out travis-deploy-key-id_rsa -d >/dev/null 2>&1; then
     echo "Decrypted key successfully."
   else
@@ -60,11 +58,8 @@ else
     exit 1
   fi
   mv travis-deploy-key-id_rsa ~/.ssh/travis-deploy-key-id_rsa
-  set -x
   chmod 600 ~/.ssh/travis-deploy-key-id_rsa
-  set +x
   eval `ssh-agent -s`
-  set -x
   ssh-add ~/.ssh/travis-deploy-key-id_rsa
 
   TRAVIS_GH_PAGES_DIR="$HOME/travis-temp-auto-push-$(date +%s)"
