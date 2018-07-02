@@ -13,16 +13,16 @@ test: test-qemu-system-i386 test-qemu-system-arm test-virtualbox test-bochs Make
 
 .PHONY: test-qemu-system-i386
 test-qemu-system-i386: os.sh ../deploy-screenshots Makefile
-	(cd .. && xvfb-run -a ./test/qemu-system-i386.sh)
+	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/qemu-system-i386.sh)
 
 .PHONY: test-qemu-system-arm
 test-qemu-system-arm: os.sh ../deploy-screenshots Makefile
-	(cd .. && xvfb-run -a ./test/qemu-system-arm.sh)
+	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/qemu-system-arm.sh)
 
 .PHONY: test-virtualbox
 test-virtualbox: os.sh ../deploy-screenshots Makefile
-	(cd .. && xvfb-run -a ./test/virtualbox.sh)
+	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/virtualbox.sh)
 
 .PHONY: test-bochs
 test-bochs: os.sh ../deploy-screenshots Makefile
-	(cd .. && xvfb-run -a ./test/bochs.sh)
+	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/bochs.sh)
