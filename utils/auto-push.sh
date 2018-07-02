@@ -66,7 +66,7 @@ else
   if test -e "$TRAVIS_AUTO_PUSH_REPO_DIR"; then rm -rf "$TRAVIS_AUTO_PUSH_REPO_DIR"; fi
   git clone -b "$deploy_base_commit" --depth 1 --shallow-submodules "$deploy_repo" "$TRAVIS_AUTO_PUSH_REPO_DIR"
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git checkout -b "$deploy_branch")
-  rsync "${deploy_directory}/" "${TRAVIS_AUTO_PUSH_REPO_DIR}/"
+  rsync -a "${deploy_directory}/" "${TRAVIS_AUTO_PUSH_REPO_DIR}/"
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git add -A . && git commit -m "Auto-publish to $deploy_branch") > commit.log || (cat commit.log && exit 1)
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git log --oneline --decorate --graph -10)
   echo '(cd '"$TRAVIS_AUTO_PUSH_REPO_DIR"' && git push --force --quiet "'"$deploy_repo"'" "master:'"$deploy_branch"'")'
