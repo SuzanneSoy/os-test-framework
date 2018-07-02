@@ -62,13 +62,13 @@ else
   eval `ssh-agent -s`
   ssh-add ~/.ssh/travis-deploy-key-id_rsa
 
-  TRAVIS_GH_PAGES_DIR="$HOME/travis-temp-auto-push-$(date +%s)"
-  if test -e "$TRAVIS_GH_PAGES_DIR"; then rm -rf "$TRAVIS_GH_PAGES_DIR"; fi
-  git clone -b "$deploy_base_commit" --depth 1 --shallow-submodules "$TRAVIS_GH_PAGES_DIR"
-  (cd "$TRAVIS_GH_PAGES_DIR" && git checkout -b "$deploy_branch")
-  rsync "${deploy_directory}/" "${TRAVIS_GH_PAGES_DIR}/"
-  (cd "$TRAVIS_GH_PAGES_DIR" && git add -A . && git commit -m "Auto-publish to $deploy_branch") > commit.log || (cat commit.log && exit 1)
-  (cd "$TRAVIS_GH_PAGES_DIR" && git log --oneline --decorate --graph -10)
-  echo '(cd '"$TRAVIS_GH_PAGES_DIR"' && git push --force --quiet "'"$deploy_repo"'" "master:'"$deploy_branch"'")'
-  (cd "$TRAVIS_GH_PAGES_DIR" && git push --force --quiet "$deploy_repo" "$deploy_branch" >/dev/null 2>&1) >/dev/null 2>&1 # redirect to /dev/null to avoid showing credentials.
+  TRAVIS_AUTO_PUSH_REPO_DIR="$HOME/travis-temp-auto-push-$(date +%s)"
+  if test -e "$TRAVIS_AUTO_PUSH_REPO_DIR"; then rm -rf "$TRAVIS_AUTO_PUSH_REPO_DIR"; fi
+  git clone -b "$deploy_base_commit" --depth 1 --shallow-submodules "$deploy_repo" "$TRAVIS_AUTO_PUSH_REPO_DIR"
+  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git checkout -b "$deploy_branch")
+  rsync "${deploy_directory}/" "${TRAVIS_AUTO_PUSH_REPO_DIR}/"
+  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git add -A . && git commit -m "Auto-publish to $deploy_branch") > commit.log || (cat commit.log && exit 1)
+  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git log --oneline --decorate --graph -10)
+  echo '(cd '"$TRAVIS_AUTO_PUSH_REPO_DIR"' && git push --force --quiet "'"$deploy_repo"'" "master:'"$deploy_branch"'")'
+  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git push --force --quiet "$deploy_repo" "$deploy_branch" >/dev/null 2>&1) >/dev/null 2>&1 # redirect to /dev/null to avoid showing credentials.
 fi
