@@ -5,12 +5,6 @@ addons:
       # graphical environment
       - scrot
       - fluxbox
-      # emulators
-      - qemu
-      - qemu-system-x86
-      - qemu-system-arm
-      #- virtualbox
-      - bochs-sdl
       # automated GUI testing
       - sikuli-ide
       # Missing dependencies for sikuli-ide
@@ -31,12 +25,41 @@ matrix:
     # Thanks to https://keyholesoftware.com/2012/12/05/building_vagrant_boxes_with_veewee_on_travis/ for making me realize that VirtualBox will actually work with sudo
     - env: MODE=qemu-system-i386
       sudo: false
+      addons:
+        apt:
+          packages:
+            - qemu
+            - qemu-system-x86
     - env: MODE=qemu-system-arm
       sudo: false
+      addons:
+        apt:
+          packages:
+            - qemu
+            - qemu-system-arm
     - env: MODE=virtualbox
       sudo: true
+      addons:
+        apt:
+          packages:
+            #- virtualbox
     - env: MODE=bochs
       sudo: false
+      addons:
+        apt:
+          packages:
+            - bochs-sdl
+    - env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
+      script: (cd example-os && make -j 10)
+      sudo: true
+      addons:
+        apt:
+          packages:
+            - qemu
+            - qemu-system-x86
+            - qemu-system-arm
+            - bochs-sdl
+            - dosbox
 
 install:
   - ./utils/install-sikulix.sh
