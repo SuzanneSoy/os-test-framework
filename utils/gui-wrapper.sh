@@ -10,7 +10,7 @@ bg="$(mktemp --suffix='.png')"
 # Create solid black background
 convert -size "$(echo "$resolution" | cut -d 'x' -f1-2)" tile:pattern:checkerboard "$bg"
 
-xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'fluxbox 2>/dev/null & sleep 5; fbsetbg -f '"$bg"'; "$@"' utils/gui-wrapper.sh-subshell "$@"
+xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'fluxbox 2>/dev/null & sleep 5; fbsetbg -f '"$bg"'; sleep 2; "$@"' utils/gui-wrapper.sh-subshell "$@"
 
 # Cleanup
 rm "$bg"
