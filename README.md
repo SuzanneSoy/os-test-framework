@@ -15,3 +15,11 @@ Below are screenshots of an example operating system. This example merely displa
 ## Bochs
 
 ![Latest screenshot of the operating system running in Bochs](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-bochs/bochs.png)
+
+## DOSBox (.bat)
+
+![Latest screenshot of the operating system running in dosbox](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-dosbox/dosbox.png)
+
+## Unix graphical environment (.sh)
+
+![Latest screenshot of the operating system running in gui-sh](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-gui-sh/gui-sh.png)

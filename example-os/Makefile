@@ -1,5 +1,5 @@
 os_filename = os.bat
-tests = test/qemu-system-i386 test/qemu-system-arm test/virtualbox test/bochs
+tests = test/qemu-system-i386 test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 
 .PHONY: all
 all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore test Makefile

@@ -49,6 +49,14 @@ matrix:
         apt:
           packages:
             - bochs-sdl
+    - env: MODE=gui-sh
+      sudo: false
+    - env: MODE=dosbox
+      sudo: false
+      addons:
+        apt:
+          packages:
+            - dosbox
     - env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
       script: (cd example-os && make -j 10)
       sudo: true

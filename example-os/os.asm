@@ -50,14 +50,19 @@ db 0xaa
 ;; end of the bootsector, close the sh here-document skipped via : <<'EOF'
 db `\n`
 db `EOF\n`
-db `echo Hello world from sh!\n`
+db `echo Hello world by the OS, from sh!\n`
 db `while sleep 10; do :; done\n`
 db `exit\n`
+;; for good measure: go into an infinite loop if the exit did not happen.
+db `while :; do sleep 1; done\n`
 
 ;; end of the SH section, everything until this point is skipped by MS-DOS batch due to the GOTO'
 db `:msdos\n`
 db `@cls\n`
-db `@echo "hello world" from MS-DOS\n`
+db `@echo Hello world by the OS, from MS-DOS!\n`
+db `command.com\n`
+db `exit\n`
+;; for good measure: go into an infinite loop if the exit did not happen.
 db `:loop\n`
 db `GOTO loop\n`
 
