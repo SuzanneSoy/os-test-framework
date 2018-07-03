@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-os_file="example-os/os.sh"
+os_filename="example-os/os.bat"
 
 bochsrc="$(mktemp)"
 cat > "$bochsrc" <<EOF
-floppya: 1_44=${os_file}, status=inserted
+floppya: 1_44=${os_filename}, status=inserted
 boot: floppy
 display_library: sdl
 EOF

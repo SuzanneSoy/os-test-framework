@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
 
-os_file="example-os/os.sh"
+os_filename="example-os/os.bat"
 img_file="$(mktemp --suffix=".img")"
 vbox_dir="$(mktemp -d --suffix="_vbox")"
 vmname="automatic-os-test-$(date +%s)-$$"
 
-ln -sf "$(readlink -f "$os_file")" "$img_file"
+ln -sf "$(readlink -f "$os_filename")" "$img_file"
 VBoxManage createvm --name "$vmname" --register --basefolder "$vbox_dir"
 VBoxManage modifyvm "$vmname" --hwvirtex off
 VBoxManage modifyvm "$vmname" --nestedpaging off
