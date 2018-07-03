@@ -30,6 +30,24 @@ matrix:
           packages:
             - qemu
             - qemu-system-x86
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=qemu-system-arm
       sudo: false
       addons:
@@ -37,26 +55,119 @@ matrix:
           packages:
             - qemu
             - qemu-system-arm
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=virtualbox
       sudo: true
       addons:
         apt:
           packages:
             #- virtualbox
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=bochs
       sudo: false
       addons:
         apt:
           packages:
             - bochs-sdl
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=gui-sh
       sudo: false
+      addons:
+        apt:
+          packages:
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=dosbox
       sudo: false
       addons:
         apt:
           packages:
             - dosbox
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
     - env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
       script: (cd example-os && make -j 10)
       sudo: true
@@ -68,6 +179,24 @@ matrix:
             - qemu-system-arm
             - bochs-sdl
             - dosbox
+            # common:
+            # graphical environment
+            - scrot
+            - fluxbox
+            # automated GUI testing
+            - sikuli-ide
+            # Missing dependencies for sikuli-ide
+            #- libantlr3-runtime-java # on 16.04
+            - antlr3 # on 14.04
+            #- jaffl-java # unavailable on Travis
+            - libjna-java
+            - libcommons-cli-java
+            - libjson-simple-java
+            - libdc1394-22
+            - libdc1394-22-dev
+            - wmctrl
+            # example-os build dependencies:
+            - nasm
 
 install:
   - ./utils/install-sikulix.sh
