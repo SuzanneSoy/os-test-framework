@@ -1,7 +1,11 @@
 #!/bin/sh
 set -e
 
-os_filename="example-os/os.bat"
+if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
+    echo "Usage: $0 operating_system_file"
+fi
+os_filename="$1"
+
 img_file="$(mktemp --suffix=".img")"
 vbox_dir="$(mktemp -d --suffix="_vbox")"
 vmname="automatic-os-test-$(date +%s)-$$"

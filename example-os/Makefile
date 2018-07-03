@@ -1,4 +1,5 @@
 os_filename = os.bat
+tests = test/qemu-system-i386 test/qemu-system-arm test/virtualbox test/bochs
 
 .PHONY: all
 all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore Makefile
@@ -37,20 +38,8 @@ clean: Makefile
 	echo /os.reasm.disasm   >> $@
 
 .PHONY: test
-test: test-qemu-system-i386 test-qemu-system-arm test-virtualbox test-bochs Makefile
+test: $(tests) Makefile
 
-.PHONY: test-qemu-system-i386
-test-qemu-system-i386: $(os_filename) ../deploy-screenshots Makefile
-	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/qemu-system-i386.sh)
-
-.PHONY: test-qemu-system-arm
-test-qemu-system-arm: $(os_filename) ../deploy-screenshots Makefile
-	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/qemu-system-arm.sh)
-
-.PHONY: test-virtualbox
-test-virtualbox: $(os_filename) ../deploy-screenshots Makefile
-	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/virtualbox.sh)
-
-.PHONY: test-bochs
-test-bochs: $(os_filename) ../deploy-screenshots Makefile
-	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./test/bochs.sh)
+.PHONY: $(tests)
+$(tests): $(os_filename) ../deploy-screenshots Makefile
+	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./$@.sh example-os/$<)

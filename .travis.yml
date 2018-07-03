@@ -44,8 +44,7 @@ install:
   - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi
 
 script:
-  - (cd example-os && make)
-  - ./utils/gui-wrapper.sh 800x600x24 ./test/${MODE}.sh
+  - (cd example-os && make test/${MODE})
   - |
     ./utils/auto-push.sh "https://github.com/jsmaniac/travis-os.git" \
                          "git@github.com:jsmaniac/travis-os-deploy-artifacts.git" \
