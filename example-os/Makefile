@@ -2,10 +2,10 @@ os_filename = os.bat
 tests = test/qemu-system-i386 test/qemu-system-arm test/virtualbox test/bochs
 
 .PHONY: all
-all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore Makefile
+all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore test Makefile
 
 ../deploy-screenshots: Makefile
-	mkdir $@
+	mkdir -p $@
 
 $(os_filename): os.asm ../deploy-screenshots Makefile
 	nasm -o $@ $<
