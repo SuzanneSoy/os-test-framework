@@ -8,8 +8,9 @@ all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore test Make
 	mkdir -p $@
 
 $(os_filename): os.asm ../deploy-screenshots Makefile
+	rm -f $@
 	nasm -o $@ $<
-	chmod a+x $@
+	chmod a+x-w $@
 
 os.ndisasm.disasm: $(os_filename) Makefile
 	../utils/compact-ndisasm.sh $< $@

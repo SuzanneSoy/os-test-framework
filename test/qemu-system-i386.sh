@@ -6,7 +6,7 @@ if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
 fi
 os_filename="$1"
 
-qemu-system-i386 -drive format=raw,file=${os_filename},index=0,if=floppy &
+qemu-system-i386 -drive format=raw,readonly,file=${os_filename},index=0,if=floppy &
 pid=$!
 runsikulix -r test/check-gradient.sikuli && exitcode=$? || exitcode=$?
 
