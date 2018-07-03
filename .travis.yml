@@ -89,7 +89,8 @@ script:
   - |
     ./utils/auto-push.sh "https://github.com/jsmaniac/travis-os.git" \
                          "git@github.com:jsmaniac/travis-os-deploy-artifacts.git" \
-                         "screenshots-$MODE" \
+                         "screenshots-$TRAVIS_BRANCH-$MODE" \
                          "deploy-base" \
                          "edf345aad47e" \
-                         "deploy-screenshots"
+                         "deploy-screenshots" \
+                         "$(if test "$TRAVIS_BRANCH" = "master"; then echo master; else echo dev; fi)"

@@ -6,20 +6,20 @@ Below are screenshots of an example operating system. This example merely displa
 
 ## QEMU
 
-![Latest screenshot of the operating system running in QEMU](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-qemu-system-i386/qemu-system-i386.png)
+![Latest screenshot of the operating system running in QEMU](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386.png)
 
 ## VirtualBox
 
-![Latest screenshot of the operating system running in VirtualBox](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-virtualbox/virtualbox.png)
+![Latest screenshot of the operating system running in VirtualBox](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-virtualbox/virtualbox.png)
 
 ## Bochs
 
-![Latest screenshot of the operating system running in Bochs](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-bochs/bochs.png)
+![Latest screenshot of the operating system running in Bochs](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-bochs/bochs.png)
 
 ## DOSBox (.bat)
 
-![Latest screenshot of the operating system running in dosbox](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-dosbox/dosbox.png)
+![Latest screenshot of the operating system running in dosbox](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-dosbox/dosbox.png)
 
 ## Unix graphical environment (.sh)
 
-![Latest screenshot of the operating system running in gui-sh](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-gui-sh/gui-sh.png)
+![Latest screenshot of the operating system running in gui-sh](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-gui-sh/gui-sh.png)
