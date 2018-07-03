@@ -5,7 +5,7 @@ set -e
 resolution="$1" # e.g. 800x600x24 (width x height x bits_per_pixel)
 shift           # the following arguments are the program to execute and its arguments
 
-bg="$(mktemp --suffix='bg.png')"
+bg="$(mktemp --suffix='.png')"
 fb_cfg="$(mktemp --suffix='fluxbox.cfg')"
 
 # Create solid black background
