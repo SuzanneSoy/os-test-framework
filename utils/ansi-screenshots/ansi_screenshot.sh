@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 screenshot="$(mktemp --suffix=".png")"
 
 scrot "$screenshot"

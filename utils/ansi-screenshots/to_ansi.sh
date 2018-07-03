@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 file="$1"
 width="$2"
 
