@@ -15,10 +15,12 @@ echo "continue" > "$bochscontinue"
 
 bochs -qf "$bochsrc" < "$bochscontinue" &
 pid=$!
-runsikulix -r test/check-gradient.sikuli
+runsikulix -r test/check-gradient.sikuli && exitcode=$? || exitcode=$?
 
 ./utils/take-screenshots.sh "./deploy-screenshots/$(basename "$0" .sh).png"
 
 kill $pid
 
 rm "${bochsrc}" "${bochscontinue}"
+
+exit $exitcode

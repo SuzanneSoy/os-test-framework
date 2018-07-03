@@ -5,8 +5,10 @@ os_file="example-os/os.sh"
 
 qemu-system-i386 -drive format=raw,file=${os_file},index=0,if=floppy &
 pid=$!
-runsikulix -r test/check-gradient.sikuli
+runsikulix -r test/check-gradient.sikuli && exitcode=$? || exitcode=$?
 
 ./utils/take-screenshots.sh "./deploy-screenshots/$(basename "$0" .sh).png"
 
 kill $pid
+
+exit $exitcode

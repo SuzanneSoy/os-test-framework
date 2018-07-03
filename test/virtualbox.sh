@@ -16,7 +16,7 @@ VBoxManage storageattach "$vmname" --storagectl 'floppy disk drive' --port 0 --d
 VBoxManage modifyvm "$vmname" --boot1 floppy
 VBoxManage startvm "$vmname" --type sdl &
 pid=$!
-runsikulix -r test/check-gradient.sikuli
+runsikulix -r test/check-gradient.sikuli && exitcode=$? || exitcode=$?
 
 ./utils/take-screenshots.sh "./deploy-screenshots/$(basename "$0" .sh).png"
 
@@ -33,3 +33,5 @@ done
 # Cleanup: remove temporary files and directories.
 rm "$img_file"
 rm "/tmp/$vbox_dir" -fr
+
+exit $exitcode
