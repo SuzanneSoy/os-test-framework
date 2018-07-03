@@ -3,6 +3,7 @@
 
 db `#!/usr/bin/env sh\n`
 db `: <<'EOF'\n`
+db `GOTO msdos\n`
 
 times 0x7c78-0x7c00-($-$$) db 0
         
@@ -50,7 +51,15 @@ db 0xaa
 db `\n`
 db `EOF\n`
 db `echo Hello world from sh!\n`
+db `while sleep 10; do :; done\n`
 db `exit\n`
+
+;; end of the SH section, everything until this point is skipped by MS-DOS batch due to the GOTO'
+db `:msdos\n`
+db `@cls\n`
+db `@echo "hello world" from MS-DOS\n`
+db `:loop\n`
+db `GOTO loop\n`
 
 ;; Fill up to 1.44M with 0
 times (1440*1024)-($-$$) db 0
