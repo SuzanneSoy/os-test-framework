@@ -9,10 +9,12 @@ os.sh: os.asm ../deploy-screenshots Makefile
 	chmod a+x $@
 
 os.ndisasm.disasm: os.sh Makefile
-	ndisasm $< \
-        | uniq -s 8 -c \
-        | sed -r -e 's/\s*1 //; t; s/\s*([0-9]+) ([^ ]+\s+[^ ]+\s+)/\2times \1 /' \
-        | sed -r -e 's/([^ ]+\s+[0-9A-F]{4}\s+jz) 0x/\1 short 0x/' > $@
+	(echo "[BITS 16]"; \
+	 echo "[ORG 0x7c00]"; \
+	 ndisasm -o 0x7C00 $< \
+         | uniq -s 8 -c \
+         | sed -r -e 's/\s*1 //; t; s/\s*([0-9]+) ([^ ]+\s+[^ ]+\s+)/\2times \1 /' \
+         | sed -r -e 's/([^ ]+\s+[0-9A-F]{4}\s+jz) 0x/\1 short 0x/') > $@
 #         The last sed line just above fixes an issue with ndisasm
 #         (it fails to annotate the jz with short).
 
