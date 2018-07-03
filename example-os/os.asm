@@ -1,6 +1,11 @@
 [BITS 16]
 [ORG 0x7c00]
 
+db `#!/usr/bin/env sh\n`
+db `: <<'EOF'\n`
+
+times 0x7c78-0x7c00-($-$$) db 0
+        
 ;; Switch to 320x200x256 VGA mode
 mov ax, 0x0013
 int 10h
@@ -40,6 +45,12 @@ end:
 times 512-2-($-$$) db 0
 db 0x55
 db 0xaa
+
+;; end of the bootsector, close the sh here-document skipped via : <<'EOF'
+db `\n`
+db `EOF\n`
+db `echo Hello world from sh!\n`
+db `exit\n`
 
 ;; Fill up to 1.44M with 0
 times (1440*1024)-($-$$) db 0
