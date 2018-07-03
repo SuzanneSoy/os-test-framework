@@ -39,17 +39,9 @@ matrix:
       sudo: false
 
 install:
-  # The sikuli-ide packaged with ubuntu 16.04 does not seem to work correctly: missing dependencies, some dependencies are too recent, …
-  - mkdir ~/sikulix/
-  - wget https://launchpadlibrarian.net/359997648/sikulixsetup-1.1.2.jar -O ~/sikulix/sikulixsetup-1.1.2.jar
-  - (cd ~/sikulix && java -jar sikulixsetup-1.1.2.jar options 1 1.1)
+  - ./utils/install-sikulix.sh
   - export PATH="$HOME/sikulix/:$PATH"
-  - |
-    if test "$MODE" = virtualbox; then
-      echo "deb https://download.virtualbox.org/virtualbox/debian $(lsb_release --short --codename) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
-      sudo apt-get update
-      sudo apt-get -y install virtualbox "linux-headers-$(uname -r)"
-    fi
+  - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi
 
 script:
   - (cd example-os && make)
