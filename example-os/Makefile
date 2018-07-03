@@ -1,9 +1,9 @@
 os_filename = os.bat
 
 .PHONY: all
-all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore
+all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm .gitignore Makefile
 
-../deploy-screenshots:
+../deploy-screenshots: Makefile
 	mkdir $@
 
 $(os_filename): os.asm ../deploy-screenshots Makefile
@@ -25,8 +25,8 @@ os.reasm: os.reasm.asm $(os_filename) Makefile
 	     echo "[0;33mRe-assembled file is different from $(os_filename). Use meld os.ndisasm.disasm os.reasm.disasm to see differences.[m"; \
 	     exit 1)
 
-.PHONY: clean Makefile
-clean:
+.PHONY: clean
+clean: Makefile
 	rm -f $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm
 
 .gitignore: Makefile
