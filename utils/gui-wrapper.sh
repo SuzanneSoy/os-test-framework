@@ -13,7 +13,9 @@ convert -size "$(echo "$resolution" | cut -d 'x' -f1-2)" tile:pattern:checkerboa
 
 xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'fluxbox 2>/dev/null & sleep 5; fbsetbg -f "'"$bg"'"; sleep 5; (for i in `seq 100`; do scrot "'"$anim"'/$(printf %03d.png $i)"; sleep 0.2; done) & "$@"' utils/gui-wrapper.sh-subshell "$@"
 
-convert $(ls "$anim"/*.png | sort) ./deploy-screenshots/anim.gif
+if -n "$(find "$anim"/ -maxdepth 1 -type f -name '*.png')"; then
+  convert $(ls "$anim"/*.png | sort) ./deploy-screenshots/anim.gif
+fi
 
 # Cleanup
 rm "$bg"
