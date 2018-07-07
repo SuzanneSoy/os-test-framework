@@ -43,4 +43,4 @@ test: $(tests) Makefile
 
 .PHONY: $(tests)
 $(tests): $(os_filename) ../deploy-screenshots Makefile
-	(cd .. && ./utils/gui-wrapper.sh 800x600x24 ./$@.sh example-os/$<)
+	cd .. && ./utils/gui-wrapper.sh 800x600x24 ./$@.sh example-os/$<
