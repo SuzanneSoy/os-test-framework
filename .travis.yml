@@ -4,7 +4,7 @@ addons:
     packages: &common_apt_packages
       # graphical environment
       - scrot
-      - fluxbox
+      - twm
       # automated GUI testing
       - sikuli-ide
       # Missing dependencies for sikuli-ide
