@@ -3,3 +3,5 @@
 /os.reasm.asm
 /os.reasm
 /os.reasm.disasm
+/os.file
+/os.arm.disasm
