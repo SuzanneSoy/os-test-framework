@@ -20,6 +20,7 @@ addons:
       # example-os build dependencies:
       - nasm
       - mtools
+      - genisoimage
 
 matrix:
   include:
@@ -35,7 +36,15 @@ matrix:
             - qemu-system-arm
             - bochs-sdl
             - dosbox
-    - env: MODE=qemu-system-i386
+    - env: MODE=qemu-system-i386-floppy
+      sudo: false
+      addons:
+        apt:
+          packages:
+            - *common_apt_packages
+            - qemu
+            - qemu-system-x86
+    - env: MODE=qemu-system-i386-cdrom
       sudo: false
       addons:
         apt:

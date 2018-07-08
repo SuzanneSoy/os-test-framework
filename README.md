@@ -4,9 +4,13 @@ This Travis configuration runs an operating system in various emulators. It can 
 
 Below are screenshots of an example operating system. This example merely displays a gradient and does not process any user input.
 
-## QEMU
+## QEMU (floppy disk)
 
-![Latest screenshot of the operating system running in QEMU](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386.png)
+![Latest screenshot of the operating system running in QEMU, booted as a floppy disk](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386-floppy.png)
+
+## QEMU (CD-ROM)
+
+![Latest screenshot of the operating system running in QEMU, booted as a CD-ROM](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386-cdrom.png)
 
 ## VirtualBox
 

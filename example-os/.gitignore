@@ -7,3 +7,10 @@
 /os.fdisk
 /os.arm.disasm
 /os.zip
+/os.zip.adjusted
+/os.iso
+/os.32k
+/os.fat12
+/os.offsets
+/iso_files/os.zip
+/iso_files/boot/iso_boot.sys
