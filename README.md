@@ -6,11 +6,11 @@ Below are screenshots of an example operating system. This example merely displa
 
 ## QEMU (floppy disk)
 
-![Latest screenshot of the operating system running in QEMU, booted as a floppy disk](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386-floppy.png)
+![Latest screenshot of the operating system running in QEMU, booted as a floppy disk](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386-floppy/qemu-system-i386-floppy.png)
 
 ## QEMU (CD-ROM)
 
-![Latest screenshot of the operating system running in QEMU, booted as a CD-ROM](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386/qemu-system-i386-cdrom.png)
+![Latest screenshot of the operating system running in QEMU, booted as a CD-ROM](https://raw.githubusercontent.com/jsmaniac/travis-os-deploy-artifacts/screenshots-master-qemu-system-i386-cdrom/qemu-system-i386-cdrom.png)
 
 ## VirtualBox
 
