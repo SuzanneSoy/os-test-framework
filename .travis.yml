@@ -19,6 +19,7 @@ addons:
       - wmctrl
       # example-os build dependencies:
       - nasm
+      - mtools
 
 matrix:
   include:

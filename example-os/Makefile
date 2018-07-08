@@ -1,6 +1,12 @@
 os_filename = os.bat
 tests = test/qemu-system-i386 test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 
+os_image_size_kb = 1440
+os_sectors_before_partition = 720
+# CHS parameters for 1.44 MB floppy disk
+os_floppy_chs_h = 2
+os_floppy_chs_s = 9
+
 .PHONY: all
 # all: os.arm.disasm
 all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm os.file .gitignore Makefile
@@ -12,6 +18,12 @@ all: $(os_filename) os.ndisasm.disasm os.reasm.asm os.reasm os.file .gitignore M
 $(os_filename): os.asm ../deploy-screenshots Makefile
 	rm -f $@
 	nasm -o $@ $<
+	mformat -v "Example OS" \
+	 -T $$(($(os_image_size_kb)*1024/512-$(os_sectors_before_partition))) \
+	 -h $(os_floppy_chs_h) \
+	 -s $(os_floppy_chs_s) \
+	 -i "$@@@$$(($(os_sectors_before_partition)*512))"
+#	mcopy … "$@@@$$(($(os_sectors_before_partition)*512))"
 	chmod a+x-w $@
 
 os.file: $(os_filename) Makefile
