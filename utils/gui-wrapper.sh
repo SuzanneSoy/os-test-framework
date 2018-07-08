@@ -25,7 +25,7 @@ EOF
 
 # -fg chocolate -bg coral looks nice too :)
 echo "$bg $twm_cfg $anim"
-xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'SM_SAVE_DIR="'"$twm_session_dir"'" twm -f "'"$twm_cfg"'" & xsetroot -bitmap "'"$bg"'" -fg gray75 -bg gray50; sleep 1; utils/screenshots-loop.sh "'"$anim"'" & "$@"' utils/gui-wrapper.sh-subshell "$@"
+xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'sleep 1; SM_SAVE_DIR="'"$twm_session_dir"'" twm -f "'"$twm_cfg"'" & xsetroot -bitmap "'"$bg"'" -fg gray75 -bg gray50; sleep 1; utils/screenshots-loop.sh "'"$anim"'" & "$@"' utils/gui-wrapper.sh-subshell "$@"
 
 touch "$anim/stop-screenshots"
 for i in `seq 60`; do if test -e "$anim/anim-done"; then break; fi; sleep 1; done

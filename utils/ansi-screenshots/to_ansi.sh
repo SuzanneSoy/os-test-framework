@@ -36,13 +36,21 @@ done
  | sed -r -e 's/  +/ /g' \
  | fold -w $((width*3)) \
  | awk "{ if (NR % 2 == 0) print > \"$even_lines\"; else print > \"$odd_lines\"; }"
-cat "$odd_lines"  | sed -e 's/ $//' | tr ' ' '\n' > "$odd_lines_px"
-cat "$even_lines" | sed -e 's/ $//' | tr ' ' '\n' > "$even_lines_px"
+nodd="$(wc -l "$odd_lines" | cut -d ' ' -f 1)"
+neven="$(wc -l "$even_lines" | cut -d ' ' -f 1)"
+if test "$nodd" -gt "$neven"; then nlines="$neven"; else nlines="$nodd"; fi
+head -n "$nlines" "$odd_lines"  | sed -e 's/ $//' | tr ' ' '\n' > "$odd_lines_px"
+head -n "$nlines" "$even_lines" | sed -e 's/ $//' | tr ' ' '\n' > "$even_lines_px"
 paste "$odd_lines_px" "$even_lines_px" \
  | tr '\t\n' '  ' \
  | fold -w $((width*6)) \
  | sed -r -e 's/([01])([0-7]) ([01])([0-7]) /[\1;3\2;4\4m▀/g' -e 's/$/[m/' \
- | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while IFS=$'\n' read -n 11 ab; do if test "${#ab}" -ne 11; then echo "$ab"; else echo -n "$ab"; fi; sleep 0.01; done; else cat; fi
+ | if test "$CI" = "true" -a "$TRAVIS" = "true"; then sed -e 's/▀/"/g'; else cat; fi
+# Using the line below instead of the one above will ensure that the output is
+# printed slow enought that unicode corruption by Travis is unlikely.
+#
+# | if test "$CI" = "true" -a "$TRAVIS" = "true"; then while IFS=$'\n' read -n 11 ab; do if test "${#ab}" -ne 11; then echo "$ab"; else echo -n "$ab"; fi; sleep 0.01; done; else cat; fi
 echo
 
 rm "${mini_png}" "${colors_gif}" "${indexed_gif}" "${indexed_pgm}" "${odd_lines}" "${even_lines}" "${odd_lines_px}" "${even_lines_px}"
+
