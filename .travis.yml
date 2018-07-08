@@ -25,7 +25,7 @@ addons:
 matrix:
   include:
     - env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
-      script: (cd example-os && make -j 10)
+      script: (cd example-os && make -j 10 test)
       sudo: true
       addons:
         apt:
