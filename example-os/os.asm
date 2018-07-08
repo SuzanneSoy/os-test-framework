@@ -63,6 +63,9 @@ db 0x55, 0xaa  ;; 0x1fe End the bootsector with 55 AA, which is the MBR signatur
 
 ;;; This is the end of the first 512 bytes (the bootsector).
 
+;;; Leave some space for the GPT header and partition table entries (LBA0 = MBR, LBA1 = header, LBA2..33 = GPT partition tables)
+times (34*512)-($-$$) db 0
+
 ;;; After the bootsector, close the sh here-document skipped via : <<'EOF'
 db `\n`
 db `EOF\n`
@@ -82,5 +85,5 @@ db `exit\n`
 db `:loop\n`
 db `GOTO loop\n`
 
-;;; Fill up to 32k with 0. This constitutes the first 32k of the ISO image.
+;;; Fill up to 32k with 0. This constitutes the reserved first 32k at the beginning of an ISO9660 image.
 times (32*1024)-($-$$) db 0
