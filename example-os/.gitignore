@@ -4,4 +4,6 @@
 /os.reasm
 /os.reasm.disasm
 /os.file
+/os.fdisk
 /os.arm.disasm
+/os.zip
