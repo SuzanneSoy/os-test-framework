@@ -24,7 +24,8 @@ addons:
 
 matrix:
   include:
-    - env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
+    - os: linux
+      env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
       script: make -j 10 test
       sudo: true
       addons:
@@ -36,7 +37,8 @@ matrix:
             - qemu-system-arm
             - bochs-sdl
             - dosbox
-    - env: MODE=qemu-system-i386-floppy
+    - os: linux
+      env: MODE=qemu-system-i386-floppy
       sudo: false
       addons:
         apt:
@@ -44,7 +46,8 @@ matrix:
             - *common_apt_packages
             - qemu
             - qemu-system-x86
-    - env: MODE=qemu-system-i386-cdrom
+    - os: linux
+      env: MODE=qemu-system-i386-cdrom
       sudo: false
       addons:
         apt:
@@ -52,7 +55,8 @@ matrix:
             - *common_apt_packages
             - qemu
             - qemu-system-x86
-    - env: MODE=qemu-system-arm
+    - os: linux
+      env: MODE=qemu-system-arm
       sudo: false
       addons:
         apt:
@@ -61,33 +65,42 @@ matrix:
             - qemu
             - qemu-system-arm
     # Thanks to https://keyholesoftware.com/2012/12/05/building_vagrant_boxes_with_veewee_on_travis/ for making me realize that VirtualBox will actually work with sudo
-    - env: MODE=virtualbox
+    - os: linux
+      env: MODE=virtualbox
       sudo: true
       addons:
         apt:
           packages:
             - *common_apt_packages
             #- virtualbox
-    - env: MODE=bochs
+    - os: linux
+      env: MODE=bochs
       sudo: false
       addons:
         apt:
           packages:
             - *common_apt_packages
             - bochs-sdl
-    - env: MODE=gui-sh
+    - os: linux
+      env: MODE=gui-sh
       sudo: false
       addons:
         apt:
           packages:
             - *common_apt_packages
-    - env: MODE=dosbox
+    - os: linux
+      env: MODE=dosbox
       sudo: false
       addons:
         apt:
           packages:
             - *common_apt_packages
             - dosbox
+    - os: osx
+      env: MODE=osx-test # Ensure that the Makefile works. Check that the generated os.bat works in sh mode
+      script: make all
+      # TODO: install sikulix
+      # TODO: test in SH mode
 
 install:
   - ./utils/install-sikulix.sh
