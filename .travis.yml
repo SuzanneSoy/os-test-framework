@@ -103,6 +103,11 @@ matrix:
       # TODO: test in SH mode
 
 install:
+  - make --version        || true
+  - nasm -v               || true
+  - mtools --version      || true
+  - mtools                || true
+  - genisoimage --version || true
   - ./utils/install-sikulix.sh
   - export PATH="$HOME/sikulix/:$PATH"
   - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi
