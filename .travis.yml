@@ -26,7 +26,7 @@ matrix:
   include:
     - os: linux
       env: MODE=self-test # Ensure that the Makefile works, especially with parallel builds.
-      script: make -j 10 test
+      install: make -j 10 test
       sudo: true
       addons:
         apt:
@@ -98,11 +98,11 @@ matrix:
             - dosbox
     - os: osx
       env: MODE=osx-test # Ensure that the Makefile works. Check that the generated os.bat works in sh mode
-      script: make all
+      install: make all
       # TODO: install sikulix
       # TODO: test in SH mode
 
-install:
+before_install:
   - make --version        || true
   - nasm -v               || true
   - mtools --version      || true
@@ -112,7 +112,7 @@ install:
   - export PATH="$HOME/sikulix/:$PATH"
   - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi
 
-script:
+install:
   - make test/${MODE}
   - |
     ./utils/auto-push.sh "https://github.com/jsmaniac/travis-os.git" \
@@ -122,3 +122,8 @@ script:
                          "edf345aad47e" \
                          "deploy-screenshots" \
                          "$(if test "$TRAVIS_BRANCH" = "master"; then echo master; else echo dev; fi)"
+
+# empty script, we want to have the commands neatly collapsed and Travis does
+# this only for some sections (install and before_install, but not script).
+script:
+  - true
