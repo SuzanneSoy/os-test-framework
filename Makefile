@@ -290,7 +290,7 @@ build/os.fdisk: ${os_filename} build/check_makefile
 	fdisk -l $< > $@
 
 build/os.offsets: ${offset_names:%=build/offsets/%.hex} build/check_makefile
-	cat ${offset_names:%=build/offsets/%.hex} > $@
+	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' > $@
 
 build/offsets/%.hex: build/offsets/%.dec
 	printf '%x\n' $$(cat $<) > $@
