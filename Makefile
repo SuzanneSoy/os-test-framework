@@ -140,7 +140,7 @@ ${more_built_directories}: Makefile
 
 # 32k header of the ISO9660 image
 build/os.32k: example-os/os.asm build/check_makefile
-	nasm -o $@ $<
+	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
 build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/check_makefile
 	mkisofs \
