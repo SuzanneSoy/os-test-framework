@@ -266,11 +266,19 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 # pad with zeroes to prepare for GPT table
 	set -x; dd if=/dev/zero seek=$$((${bytes_gpt_mirror_end} - 1 )) bs=1 count=1 conv=notrunc of=$@
 # patch the partition table
-	printf "p\nd\nn\np\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\nt\n01\na\n1\np\nw\nq\n" | fdisk $@
 # Thanks to https://wiki.gentoo.org/wiki/Hybrid_partition_table for showing that gdisk can be used to make a hybrid MBR / GPT.
-# gdisk commands: recovery, make hybrid, add GPT partition #1 to the hybrid MBR, don't put the EFI partition first,
-#                 partition type=0x01, bootable=Y, don't add extra partitions, print GPT, print MBR, write, proceed, quit.
-	printf "r\nh\n1\nN\n01\nY\nN\np\no\nw\nY\nq\n" | gdisk $@
+#       gdisk commands:
+#         * Delete (the only) partition, eXpert mode, sector aLignment = 1, back to Main menu,
+#         * New partition (number = 1, start sector, end sector, type 0700)
+#         * Recovery and transformation options, make Hybrid,
+#           * add GPT partition #1 to the hybrid MBR, do Not put the EFI partition first,
+#           * MBR partition type=0x01, bootable=Yes, do Not add extra partitions,
+#         * Print GPT, print MBR, Write, Proceed.
+	(printf "d\nx\nl\n1\nm\nn\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\n0700\n"; \
+	 printf "r\nh\n"; \
+	 printf "1\nN\n"; \
+	 printf "01\nY\nN\n"; \
+	 printf "p\no\nw\nY\n") | while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done | gdisk $@
 # splice in zip at the end
 	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=build/os.zip.adjusted of=$@
 	chmod a+x-w $@
