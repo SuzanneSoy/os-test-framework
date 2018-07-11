@@ -123,10 +123,10 @@ build/makefile_built_files: build/check_makefile_w_arnings
 	@echo ${built_files} | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
 
 build/makefile_phony: build/makefile_database_files build/check_makefile_w_arnings
-	@sed -r -n -e 's/^.PHONY: (.*)$$/\1/p' $< | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
+	@sed -n -e 's/^\.PHONY: \(.*\)$$/\1/p' $< | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
 
 build/makefile_targets: build/makefile_database_files build/check_makefile_w_arnings
-	@grep -E -v '^(\s|#|\.|$$|^[^:]*:$$)' $< | grep '^[^ :]*:' | sed -r -e 's|^([^:]*):.*$$|\1|' | sort > $@
+	@grep -E -v '^(\s|#|\.|$$|^[^:]*:$$)' $< | grep '^[^ :]*:' | sed -e 's|^\([^:]*\):.*$$|\1|' | sort > $@
 
 build/makefile_non_file_targets: build/makefile_phony build/makefile_built_directories build/check_makefile_w_arnings
 	@cat build/makefile_phony build/makefile_built_directories | sort > $@
@@ -289,13 +289,13 @@ build/offsets/%.hex: build/offsets/%.dec
 
 build/os.hex_with_offsets: ${os_filename} build/os.offsets
 	hexdump -C $< \
-	 | grep -E -e "($$(cat build/os.offsets | cut -d '=' -f 2 | sed -r -e 's/^\s*0x(.*).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
+	 | grep -E -e "($$(cat build/os.offsets | cut -d '=' -f 2 | sed -e 's/^\s*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
 
 build/os.ndisasm.disasm: ${os_filename} utils/compact-ndisasm.sh build/check_makefile
 	./utils/compact-ndisasm.sh $< $@
 
 build/os.reasm.asm: build/os.ndisasm.disasm build/check_makefile
-	sed -r -e 's/^[^ ]+ +[^ ]+ +//' $< > $@
+	sed -e 's/^[^ ]\+ \+[^ ]\+ \+//' $< > $@
 
 build/test_pass/noemu_%.reasm build/%.reasm: build/%.reasm.asm ${os_filename} utils/compact-ndisasm.sh build/check_makefile
 # For now ignore this test, since we cannot have a reliable re-assembly of arbitrary data.
@@ -334,7 +334,10 @@ test: ${tests_emu:test/%=build/test_pass/emu_%} \
 ${tests_emu}: build/test_pass/emu_$$(@F)
 
 build/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
- ${os_filename} utils/gui-wrapper.sh test/%.sh build/check_makefile \
+ ${os_filename} \
+ utils/gui-wrapper.sh utils/ansi-screenshots/ansi_screenshot.sh utils/ansi-screenshots/to_ansi.sh \
+ test/%.sh \
+ build/check_makefile \
  | build/test_pass deploy-screenshots
 	./utils/gui-wrapper.sh 800x600x24 ./test/$*.sh $<
 	touch build/test_pass/emu_$*

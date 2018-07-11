@@ -31,9 +31,9 @@ done
 && convert "${indexed_gif}" "${indexed_pgm}" \
 && tail -n +4 "${indexed_pgm}" \
  | hexdump -Cv \
- | sed -n -r -e 's/^[0-9a-f]*  (([0-9a-f]{2}  ?){1,16}).*$/\1/p' \
+ | sed -n -e 's/^[0-9a-f]*  \(\([0-9a-f]\{2\}  \?\)\{1,16\}\).*$/\1/p' \
  | tr '\n' ' ' \
- | sed -r -e 's/  +/ /g' \
+ | sed -e 's/  \+/ /g' \
  | fold -w $((width*3)) \
  | awk "{ if (NR % 2 == 0) print > \"$even_lines\"; else print > \"$odd_lines\"; }"
 nodd="$(wc -l "$odd_lines" | cut -d ' ' -f 1)"
@@ -44,7 +44,7 @@ head -n "$nlines" "$even_lines" | sed -e 's/ $//' | tr ' ' '\n' > "$even_lines_p
 paste "$odd_lines_px" "$even_lines_px" \
  | tr '\t\n' '  ' \
  | fold -w $((width*6)) \
- | sed -r -e 's/([01])([0-7]) ([01])([0-7]) /[\1;3\2;4\4m▀/g' -e 's/$/[m/' \
+ | sed -e 's/\([01]\)\([0-7]\) \([01]\)\([0-7]\) /[\1;3\2;4\4m▀/g' -e 's/$/[m/' \
  | if test "$CI" = "true" -a "$TRAVIS" = "true"; then sed -e 's/▀/"/g'; else cat; fi
 # Using the line below instead of the one above will ensure that the output is
 # printed slow enought that unicode corruption by Travis is unlikely.

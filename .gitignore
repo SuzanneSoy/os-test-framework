@@ -95,7 +95,6 @@
 /build/test_pass/noemu_zip
 /build/test_pass/sudo_fat12_mount
 /build/test_pass/sudo_iso_mount
-/deploy-screenshots
 /deploy-screenshots/bochs-anim.gif
 /deploy-screenshots/bochs.png
 /deploy-screenshots/dosbox-anim.gif
