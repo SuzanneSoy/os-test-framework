@@ -4,7 +4,10 @@ set -e
 if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
     echo "Usage: $0 operating_system_file"
 fi
-os_filename="$1"
+# Force the path to be relative or absolute, but with at least one /
+# Otherwise, the command will be searched in the $PATH, instead of using the
+# given file.
+os_filename="$(dirname "$1")/$(basename "$1")"
 
 xterm -e ${os_filename} &
 pid=$!
