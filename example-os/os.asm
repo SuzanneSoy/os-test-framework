@@ -1,9 +1,9 @@
 [BITS 16]
 [ORG 0x7c00]
 
-db `#!/usr/bin/env sh\n`
-db `: <<'EOF'\n`
-db `GOTO msdos\n`
+db "#!/usr/bin/env sh", 0x0a
+db ": <<'EOF'", 0x0a
+db "GOTO msdos", 0x0a
 
 ;;; The #!… above is interpreted as … jnz short 0x7c78 in x86 assembly.
 times 0x7c78-0x7c00-($-$$) db 0
@@ -23,25 +23,25 @@ xor bl, bl
 xor di,di
 
 ;;; Store pixels, display something flashy.
-loop:
+pixel_loop:
 	mov byte [fs:di], bl
 	inc bl
 	inc di
 	cmp bl, 255
 	je endline
-	jmp loop
+	jmp pixel_loop
 
 endline:
 	add di, 65
 	xor bl, bl
 	mov ax, di
 	cmp ax, (320*200)
-	je end
-	jmp loop
+	je infinite_loop
+	jmp pixel_loop
 
-;;; Infinite loop
-end:
-	jmp end
+;;; For now, hang until the computer is rebooted.
+infinite_loop:
+	jmp infinite_loop
 
 ;;; Fill the remaining bytes with 0 and write a partition table
 times 0x1b8-($-$$) db 0
@@ -67,23 +67,23 @@ db 0x55, 0xaa  ;; 0x1fe End the bootsector with 55 AA, which is the MBR signatur
 times (34*512)-($-$$) db 0
 
 ;;; After the bootsector, close the sh here-document skipped via : <<'EOF'
-db `\n`
-db `EOF\n`
-db `echo Hello world by the OS, from sh!\n`
-db `while sleep 10; do :; done\n`
-db `exit\n`
+db 0x0a
+db "EOF", 0x0a
+db "echo Hello world by the OS, from sh!", 0x0a
+db "while sleep 10; do :; done", 0x0a
+db "exit", 0x0a
 ;;; for good measure: go into an infinite loop if the exit did not happen.
-db `while :; do sleep 1; done\n`
+db "while :; do sleep 1; done", 0x0a
 
 ;;; end of the SH section, everything until this point is skipped by MS-DOS batch due to the GOTO'
-db `:msdos\n`
-db `@cls\n`
-db `@echo Hello world by the OS, from MS-DOS!\n`
-db `command.com\n`
-db `exit\n`
+db ":msdos", 0x0a
+db "@cls", 0x0a
+db "@echo Hello world by the OS, from MS-DOS!", 0x0a
+db "command.com", 0x0a
+db "exit", 0x0a
 ;;; for good measure: go into an infinite loop if the exit did not happen.
-db `:loop\n`
-db `GOTO loop\n`
+db ":loop", 0x0a
+db "GOTO loop", 0x0a
 
 ;;; Fill up to 32k with 0. This constitutes the reserved first 32k at the beginning of an ISO9660 image.
 times (32*1024)-($-$$) db 0
