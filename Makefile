@@ -161,7 +161,7 @@ build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/che
 define offset
 tmp_${1} = ${3}
 build/offsets/${1}.dec: $${tmp_${1}:%=build/offsets/%.dec} build/check_makefile
-	echo $$$$(( ${2} )) > $$@
+	echo $$$$(( ${2} )) | tee $$@
 ${1} = $$$$(cat build/offsets/${1}.dec)
 dep_${1} = build/offsets/${1}.dec
 endef
@@ -172,17 +172,17 @@ endef
 
 sector_size = 512
 # should be exact (TODO: make a check)
-${eval ${call offset,bytes_os_size,     $${os_image_size_kb} * 1024,,                                 }}
+${eval ${call offset,bytes_os_size,     $${os_image_size_kb} * 1024,,                                  }}
 ${eval ${call offset,sectors_os_size,   $${bytes_os_size}    / $${sector_size},                        bytes_os_size,}}
 ${eval ${call offset,tracks_os_size,    $${sectors_os_size}  / $${os_floppy_chs_s},                    sectors_os_size,}}
 
 # round up
-${eval ${call offset,bytes_iso_size,    $$$$(wc -c build/os.iso | cut -d ' ' -f 1),                    ,build/os.iso}}
+${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c build/os.iso),                       ,build/os.iso}}
 ${eval ${call offset,sectors_iso_size,  ${call div_round_up,$${bytes_iso_size},$${sector_size}},       bytes_iso_size,}}
 ${eval ${call offset,tracks_iso_size,   ${call div_round_up,$${sectors_iso_size},$${os_floppy_chs_s}}, sectors_iso_size,}}
 
 # round up
-${eval ${call offset,bytes_zip_size,    $$$$(wc -c build/os.zip | cut -d ' ' -f 1),                    ,build/os.zip}}
+${eval ${call offset,bytes_zip_size,    $$$$(utils/file-length.sh -c build/os.zip),                       ,build/os.zip}}
 ${eval ${call offset,sectors_zip_size,  ${call div_round_up,$${bytes_zip_size},$${sector_size}},       bytes_zip_size,}}
 ${eval ${call offset,tracks_zip_size,   ${call div_round_up,$${sectors_zip_size},$${os_floppy_chs_s}}, sectors_zip_size,}}
 
@@ -358,8 +358,8 @@ build/test_pass/noemu_zip: ${os_filename} build/check_makefile
 	touch $@
 
 build/test_pass/noemu_sizes: build/os.32k ${os_filename} build/check_makefile
-	test "$$(wc -c build/os.32k)" = "$$((32*1024)) build/os.32k"
-	test "$$(wc -c ${os_filename})" = "$$((1440*1024)) ${os_filename}"
+	test "$$(utils/file-length.sh -c build/os.32k)" = "$$((32*1024))"
+	test "$$(utils/file-length.sh -c ${os_filename})" = "$$((1440*1024))"
 	touch $@
 
 # check that the fat filesystem has the correct contents

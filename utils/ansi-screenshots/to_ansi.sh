@@ -36,8 +36,8 @@ done
  | sed -e 's/  \+/ /g' \
  | fold -w $((width*3)) \
  | awk "{ if (NR % 2 == 0) print > \"$even_lines\"; else print > \"$odd_lines\"; }"
-nodd="$(wc -l "$odd_lines" | cut -d ' ' -f 1)"
-neven="$(wc -l "$even_lines" | cut -d ' ' -f 1)"
+nodd="$($(dirname "$0")/../file-length.sh -l "$odd_lines")"
+neven="$($(dirname "$0")/../file-length.sh -l "$even_lines")"
 if test "$nodd" -gt "$neven"; then nlines="$neven"; else nlines="$nodd"; fi
 head -n "$nlines" "$odd_lines"  | sed -e 's/ $//' | tr ' ' '\n' > "$odd_lines_px"
 head -n "$nlines" "$even_lines" | sed -e 's/ $//' | tr ' ' '\n' > "$even_lines_px"
