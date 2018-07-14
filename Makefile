@@ -117,16 +117,16 @@ build/makefile_database_files: build/makefile_database build/check_makefile_w_ar
 	@sed -n -e '/^# Files$$/,/^# files hash-table stats:$$/p' $< > $@
 
 build/makefile_built_directories: build/check_makefile_w_arnings
-	@echo ${more_built_directories} | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
+	@echo ${more_built_directories} | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
 build/makefile_built_files: build/check_makefile_w_arnings
-	@echo ${built_files} | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
+	@echo ${built_files} | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
 build/makefile_phony: build/makefile_database_files build/check_makefile_w_arnings
-	@sed -n -e 's/^\.PHONY: \(.*\)$$/\1/p' $< | tr ' ' '\n' | grep -v '^\s*$$' | sort > $@
+	@sed -n -e 's/^\.PHONY: \(.*\)$$/\1/p' $< | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
 build/makefile_targets: build/makefile_database_files build/check_makefile_w_arnings
-	@grep -E -v '^(\s|#|\.|$$|^[^:]*:$$)' $< | grep '^[^ :]*:' | sed -e 's|^\([^:]*\):.*$$|\1|' | sort > $@
+	@grep -E -v '^([[:space:]]|#|\.|$$|^[^:]*:$$)' $< | grep '^[^ :]*:' | sed -e 's|^\([^:]*\):.*$$|\1|' | sort > $@
 
 build/makefile_non_file_targets: build/makefile_phony build/makefile_built_directories build/check_makefile_w_arnings
 	@cat build/makefile_phony build/makefile_built_directories | sort > $@
@@ -297,7 +297,7 @@ build/offsets/%.hex: build/offsets/%.dec
 
 build/os.hex_with_offsets: ${os_filename} build/os.offsets
 	hexdump -C $< \
-	 | grep -E -e "($$(cat build/os.offsets | cut -d '=' -f 2 | sed -e 's/^\s*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
+	 | grep -E -e "($$(cat build/os.offsets | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
 
 build/os.ndisasm.disasm: ${os_filename} utils/compact-ndisasm.sh build/check_makefile
 	./utils/compact-ndisasm.sh $< $@
@@ -364,7 +364,7 @@ build/test_pass/noemu_sizes: build/os.32k ${os_filename} build/check_makefile
 
 # check that the fat filesystem has the correct contents
 build/test_pass/noemu_fat12_contents: ${os_filename} ${dep_bytes_fat12_start} build/check_makefile
-	mdir -i "$<@@${bytes_fat12_start}" :: | grep -E "^os\s+zip\s+"
+	mdir -i "$<@@${bytes_fat12_start}" :: | grep -E "^os[[:space:]]+zip[[:space:]]+"
 	touch $@
 
 .PHONY: test/requiring_sudo
