@@ -292,7 +292,7 @@ build/os.fdisk: ${os_filename} build/check_makefile
 #         * Recovery and transformation options
 #         * print prOtective MBR table
 #         * Quit
-	printf 'p\nr\no\nq\n' | gdisk $< > $@
+	printf 'p\nr\no\nq\n' | gdisk $< | tee $@
 
 build/os.offsets: ${offset_names:%=build/offsets/%.hex} build/check_makefile
 	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' > $@
