@@ -98,7 +98,7 @@ matrix:
             - dosbox
     - os: osx
       env: MODE=osx-test # Ensure that the Makefile works. Check that the generated os.bat works in sh mode
-      install: make all
+      install: make all test/noemu test/macos
       # TODO: install sikulix
       # TODO: test in SH mode
 
