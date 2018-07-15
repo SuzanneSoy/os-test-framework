@@ -391,7 +391,10 @@ build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_
 	touch $@
 
 .PHONY: test/macos
-test/macos: build/check_makefile | deploy-screenshots
+test/macos: all test/noemu test/macos-sh
+
+.PHONY: test/macos-sh
+test/macos-sh: build/check_makefile | deploy-screenshots
 	sudo mkdir /tmp/.X11-unix
 	sudo chmod a+rwxt /tmp/.X11-unix
 	xvfb :42 & \
