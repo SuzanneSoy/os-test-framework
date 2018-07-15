@@ -103,21 +103,21 @@ matrix:
       # TODO: test in SH mode
 
 before_install:
-  - brew install cdrtools    || true
-  - brew install mtools      || true
-  - brew cask install gdisk  || true
-  - brew install imagemagick || true
-  - make --version           || true
-  - nasm -v                  || true
-  - mtools --version         || true
-  - mtools                   || true
-  - mkisofs --version        || true
-  - zip --help               || true
-  - unzip --version          || true
-  - gdisk --version          || true
-  - fdisk --version          || true
-  - import --version         || true
-  - Xvfb -h                  || true
+  - brew install cdrtools               || true
+  - brew install mtools                 || true
+  - brew cask install gdisk             || true
+  - brew install imagemagick --with-x11 || true
+  - make --version                      || true
+  - nasm -v                             || true
+  - mtools --version                    || true
+  - mtools                              || true
+  - mkisofs --version                   || true
+  - zip --help                          || true
+  - unzip --version                     || true
+  - gdisk --version                     || true
+  - fdisk --version                     || true
+  - import --version                    || true
+  - Xvfb -h                             || true
   - ./utils/install-sikulix.sh
   - export PATH="$HOME/sikulix/:$PATH"
   - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi

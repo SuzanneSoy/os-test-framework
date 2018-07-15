@@ -393,7 +393,7 @@ build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_
 .PHONY: test/macos
 test/macos: build/check_makefile | deploy-screenshots
 	sudo mkdir /tmp/.X11-unix
-	sudo chmod 1777 /tmp/.X11-unix
+	sudo chmod a+rwxt /tmp/.X11-unix
 	xvfb :42 & \
 	sleep 10; \
 	DISPLAY=:42 xterm -e 'sh -c "echo hello; sleep 30"' & \
