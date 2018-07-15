@@ -392,6 +392,14 @@ build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_
 
 .PHONY: test/macos
 test/macos: build/check_makefile | deploy-screenshots
-	xvfb-run sh -c "dterm -e 'echo hello; sleep 30' & sleep 5; import -window root deploy-screenshots/macos.png"
+	sudo mkdir /tmp/.X11-unix
+	sudo chmod 1777 /tmp/.X11-unix
+	xvfb :42 & \
+	sleep 10; \
+	DISPLAY=:42 xterm -e 'sh -c "echo hello; sleep 30"' & \
+	sleep 5; \
+	DISPLAY=:42 import -window root deploy-screenshots/macos.png
+	ls -l deploy-screenshots/
+	identify deploy-screenshots/* || true
 
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
