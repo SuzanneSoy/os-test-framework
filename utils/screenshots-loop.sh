@@ -2,17 +2,29 @@
 
 set -e
 
-if test $# -ne 1 || test "$1" = "-h" -o "$1" = "--help"; then
-  echo "Usage: $0 path/to/screenshots/directory"
+usage() {
+  echo "Usage: $0 {x11|mac} path/to/screenshots/directory"
+}
+
+if test $# -ne 2 || test "$1" = "-h" -o "$1" = "--help"; then
+  usage
   exit 1
 fi
-screenshots_dir="$1"
+platform="$1"
+screenshots_dir="$2"
+
+case $platform in
+    x11) screenshot_tool=scrot;;
+    mac) screenshot_tool=screencapture;;
+    *) usage; exit 1;;
+esac
+
 
 for i in `seq 100`; do
   if test -e "$screenshots_dir/stop-screenshots"; then
     break
   fi
-  scrot "$screenshots_dir/$(printf %03d.png $i)" || break
+  "$screenshot_tool" "$screenshots_dir/$(printf %03d.png $i)" || break
   sleep 0.2
 done
 

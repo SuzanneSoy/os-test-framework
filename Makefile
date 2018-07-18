@@ -416,7 +416,9 @@ test/macos-sh: build/check_makefile \
 	osascript -e 'tell app "Terminal" to activate'
 	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/os.bat"'
 	sleep 5
+	(date +%n && sleep 0.2 && date +%n) || true
 	screencapture deploy-screenshots/screencapture-os-bat.png
+	./utils/gui-wrapper-mac.sh 1024x768x24 ./test/gui-sh-mac.sh ${os_filename}
 
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
 
