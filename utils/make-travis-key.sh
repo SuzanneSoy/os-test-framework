@@ -36,7 +36,7 @@ if ! which travis > /dev/null; then
   gem install travis || echo "Notice: you need the following packages or their equivalent: ruby ruby-dev"
 fi
 
-ssh_dir="$(mktemp -d --suffix=travis-deploy-ssh-keygen)"
+ssh_dir="$(mktemp -d tmp.XXXXXXXXXX_travis-deploy-ssh-keygen)"
 mkdir -m 700 "${ssh_dir}/permissions/"
 ssh-keygen -N '' -f "${ssh_dir}/permissions/travis-deploy-key-id_rsa"
 

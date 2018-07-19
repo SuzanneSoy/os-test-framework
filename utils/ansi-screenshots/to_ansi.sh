@@ -5,14 +5,14 @@ set -e
 file="$1"
 width="$2"
 
-mini_png="$(mktemp --suffix=".png")"
-colors_gif="$(mktemp --suffix=".gif")"
-indexed_gif="$(mktemp --suffix=".gif")"
-indexed_pgm="$(mktemp --suffix=".pgm")"
-odd_lines="$(mktemp --suffix=".odd")"
-even_lines="$(mktemp --suffix=".even")"
-odd_lines_px="$(mktemp --suffix=".odd.px")"
-even_lines_px="$(mktemp --suffix=".even.px")"
+mini_png="$(mktemp tmp.XXXXXXXXXX.png)"
+colors_gif="$(mktemp tmp.XXXXXXXXXX.gif)"
+indexed_gif="$(mktemp tmp.XXXXXXXXXX.gif)"
+indexed_pgm="$(mktemp tmp.XXXXXXXXXX.pgm)"
+odd_lines="$(mktemp tmp.XXXXXXXXXX.odd)"
+even_lines="$(mktemp tmp.XXXXXXXXXX.even)"
+odd_lines_px="$(mktemp tmp.XXXXXXXXXX.odd.px)"
+even_lines_px="$(mktemp tmp.XXXXXXXXXX.even.px)"
 
 colors=(78,78,78 255,108,96 0,170,0 288,288,182 150,203,254 255,115,253 85,255,255 238,238,238 124,124,124 255,155,147 177,253,121 255,255,145 181,220,254 255,156,254 85,255,255 255,255,255)
 args=()

@@ -5,8 +5,8 @@ set -e
 resolution="$1" # e.g. 800x600x24 (width x height x bits_per_pixel)
 shift           # the following arguments are the program to execute and its arguments
 
-bg="$(mktemp --suffix='.xbm')"
-twm_cfg="$(mktemp --suffix='_twm.cfg')"
+bg="$(mktemp tmp.XXXXXXXXXX.xbm)"
+twm_cfg="$(mktemp tmp.XXXXXXXXXX_twm.cfg)"
 twm_session_dir="$(mktemp -d)"
 anim="$(mktemp -d)"
 
