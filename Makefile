@@ -391,18 +391,24 @@ build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_
 	touch $@
 
 .PHONY: test/macos
-test/macos: all test/noemu test/macos-sh
+test/macos: all test/noemu test/macos-sh test/macos-sh-x11
+
+.PHONY: test/macos-sh-x11
+test/macos-sh-x11:
+	sudo mkdir -p /tmp/.X11-unix
+	sudo chmod a+rwxt /tmp/.X11-unix
+	xvfb :42 & \
+	sleep 5; \
+	DISPLAY=:42 xterm -e ./os.bat & \
+	sleep 5; \
+#	DISPLAY=:42 import -window root deploy-screenshots/macos-sh-x11.png
+	screencapture deploy-screenshots/macos-sh-x11-screencapture.png
 
 .PHONY: test/macos-sh
 test/macos-sh: build/check_makefile | deploy-screenshots
-	sudo mkdir /tmp/.X11-unix
-	sudo chmod a+rwxt /tmp/.X11-unix
-	xvfb :42 & \
-	sleep 10; \
-	DISPLAY=:42 xterm -e 'sh -c "echo hello; sleep 30"' & \
-	sleep 5; \
-	DISPLAY=:42 import -window root deploy-screenshots/macos.png
-	ls -l deploy-screenshots/
-	identify deploy-screenshots/* || true
+	osascript -e 'tell app "Terminal" to activate'
+	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/os.bat"'
+	sleep 5
+	screencapture deploy-screenshots/screencapture-os-bat.png
 
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
