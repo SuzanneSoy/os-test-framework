@@ -5,8 +5,7 @@ set -e
 resolution="$1" # e.g. 800x600x24 (width x height x bits_per_pixel)
 shift           # the following arguments are the program to execute and its arguments
 
-bg="$(./utils/mktemp.sh .xbm)"
-twm_cfg="$(./utils/mktemp.sh .twm.cfg)"
+bg="build/checkerboard_$(echo "$resolution" | cut -d 'x' -f1-2).xbm"
 twm_session_dir="$(./utils/mktemp.sh -d)"
 anim="$(./utils/mktemp.sh -d)"
 
@@ -19,13 +18,13 @@ convert -size "$(echo "$resolution" | cut -d 'x' -f1-2)" \
         -auto-level \
         "$bg"
 
-cat > "$twm_cfg" <<EOF
+cat > "build/twm_cfg" <<EOF
 RandomPlacement
 EOF
 
-echo "$bg $twm_cfg $anim $resolution $@"
+echo "$bg $anim $resolution $@"
 # -fg chocolate -bg coral looks nice too :)
-xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'sleep 2; SM_SAVE_DIR="'"$twm_session_dir"'" twm -f "'"$twm_cfg"'" & sleep 1 && xsetroot -bitmap "'"$bg"'" -fg gray75 -bg gray50 && sleep 1 && utils/screenshots-loop.sh "'"$anim"'" & "$@"' utils/gui-wrapper.sh-subshell "$@"
+xvfb-run -a --server-args="-screen 0 ${resolution}" sh -c 'sleep 2; SM_SAVE_DIR="'"$twm_session_dir"'" twm -f "'"build/twm_cfg"'" & sleep 1 && xsetroot -bitmap "'"$bg"'" -fg gray75 -bg gray50 && sleep 1 && ./utils/screenshots-loop.sh x11 "'"$anim"'" & "$@"' ./utils/gui-wrapper.sh-subshell "$@"
 
 touch "$anim/stop-screenshots"
 anim_done=false
@@ -36,5 +35,4 @@ if test -e "$anim/anim.gif"; then
 fi
 
 # Cleanup
-rm -- "$bg" "$twm_cfg"
 rm -r -- "$twm_session_dir" "$anim"

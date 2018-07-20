@@ -6,24 +6,20 @@ if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
 fi
 os_filename="$1"
 
-bochsrc="$(./utils/mktemp.sh)"
-cat > "$bochsrc" <<EOF
+cat > "build/bochsrc" <<EOF
 floppya: 1_44=${os_filename}, status=inserted
 boot: floppy
 display_library: sdl
 EOF
 
-bochscontinue="$(./utils/mktemp.sh)"
-echo "continue" > "$bochscontinue"
+echo "continue" > "build/bochscontinue"
 
-bochs -qf "$bochsrc" < "$bochscontinue" &
+bochs -qf "build/bochsrc" < "build/bochscontinue" &
 pid=$!
 runsikulix -r test/check-gradient.sikuli && exitcode=$? || exitcode=$?
 
 ./utils/take-screenshots.sh "./deploy-screenshots/$(basename "$0" .sh).png"
 
 kill $pid
-
-rm "${bochsrc}" "${bochscontinue}"
 
 exit $exitcode

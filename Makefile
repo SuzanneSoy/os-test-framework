@@ -71,6 +71,10 @@ built_files = ${os_filename} \
               build/os.hex_with_offsets \
               build/iso_files/os.zip \
               build/iso_files/boot/iso_boot.sys \
+              build/bochsrc \
+              build/bochscontinue \
+              build/twm_cfg \
+              build/virtualbox.img \
               ${more_offset_dec} \
               ${more_offset_hex} \
               ${tests_emu:test/%=build/test_pass/emu_%} \
@@ -348,6 +352,7 @@ ${tests_emu}: build/test_pass/emu_$$(@F)
 
 build/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
  ${os_filename} \
+ build/checkerboard_800x600.xbm \
  utils/gui-wrapper.sh utils/ansi-screenshots/ansi_screenshot.sh utils/ansi-screenshots/to_ansi.sh \
  test/%.sh \
  build/check_makefile \
@@ -405,10 +410,29 @@ test/macos-sh-x11:
 	screencapture deploy-screenshots/macos-sh-x11-screencapture.png
 
 .PHONY: test/macos-sh
-test/macos-sh: build/check_makefile | deploy-screenshots
+test/macos-sh: build/check_makefile \
+               build/checkerboard_1024x768.png \
+               | deploy-screenshots
 	osascript -e 'tell app "Terminal" to activate'
 	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/os.bat"'
 	sleep 5
 	screencapture deploy-screenshots/screencapture-os-bat.png
 
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
+
+# Create checkerboard background
+build/checkerboard_%.png: build/check_makefile
+	convert -size "$*" \
+	        tile:pattern:checkerboard \
+	        -auto-level +level-colors 'gray(192),gray(128)' \
+	        $@
+
+build/checkerboard_%.xbm: build/check_makefile
+	convert -size "$*" \
+	        tile:pattern:checkerboard \
+	        -auto-level \
+	        $@
+
+# Temporary files
+build/bochsrc build/bochscontinue build/twm_cfg build/virtualbox.img:
+	touch $@

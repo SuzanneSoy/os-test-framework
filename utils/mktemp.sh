@@ -11,16 +11,12 @@ else
   mkdir_opt=''
 fi
 
-if test $# -gt 1; then
-  echo "Usage: $0 [-d] .suffix" >&2
+if test $# -gt 0; then
+  echo "Usage: $0 [-d]" >&2
   exit 1
-elif test $# -eq 1; then
-  suffix="$1"
-else
-  suffix=''
 fi
 
-result="$(mktemp $mkdir_opt "${the_tmp_dir}tmp.XXXXXXXXXX$suffix")"
+result="$(mktemp $mkdir_opt "${the_tmp_dir}/tmp.XXXXXXXXXX")"
 
 # Sanity checks:
 

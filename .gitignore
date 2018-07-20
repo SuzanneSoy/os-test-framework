@@ -1,3 +1,5 @@
+/build/bochscontinue
+/build/bochsrc
 /build/check_makefile
 /build/check_makefile_targets
 /build/check_makefile_w_arnings
@@ -95,6 +97,8 @@
 /build/test_pass/noemu_zip
 /build/test_pass/sudo_fat12_mount
 /build/test_pass/sudo_iso_mount
+/build/twm_cfg
+/build/virtualbox.img
 /deploy-screenshots/bochs-anim.gif
 /deploy-screenshots/bochs.png
 /deploy-screenshots/dosbox-anim.gif

@@ -59,26 +59,25 @@ else
     echo "Error while decrypting key."
     exit 1
   fi
+  # TODO: all the config should be in a separate folder, instead of using ~/.ssh for the id_rsa.
   mv travis-deploy-key-id_rsa ~/.ssh/travis-deploy-key-id_rsa
   chmod 600 ~/.ssh/travis-deploy-key-id_rsa
   eval `ssh-agent -s`
   ssh-add ~/.ssh/travis-deploy-key-id_rsa
-  # TODO: all the config should be in a separate folder, instead of using ~/.ssh for the id_rsa.
-  
-  known_hosts_d="$(UMASK=077 "$(dirname "$0")/mktemp.sh" -d)"
-  touch ${known_hosts_d}/known_hosts
-  chmod 600 ${known_hosts_d}/known_hosts
-  echo "github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> "${known_hosts_d}/known_hosts"
-  
+
+  travis_known_hosts="$(realpath "$(dirname "$0")/travis_known_hosts")"
+  chmod 600 "$travis_known_hosts"
+  echo "$travis_known_hosts"
+  cat "$travis_known_hosts"
+  ssh -o UserKnownHostsFile=$travis_known_hosts git@github.com || true
+
   TRAVIS_AUTO_PUSH_REPO_DIR="$HOME/travis-temp-auto-push-$(date +%s)"
   if test -e "$TRAVIS_AUTO_PUSH_REPO_DIR"; then rm -rf "$TRAVIS_AUTO_PUSH_REPO_DIR"; fi
-  GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=${known_hosts_d}/known_hosts" git clone -b "$deploy_base_commit" --depth 1 --shallow-submodules "$deploy_repo" "$TRAVIS_AUTO_PUSH_REPO_DIR"
+  GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$travis_known_hosts" git clone -b "$deploy_base_commit" --depth 1 --shallow-submodules "$deploy_repo" "$TRAVIS_AUTO_PUSH_REPO_DIR"
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git checkout -b "$deploy_branch")
   rsync -a "${deploy_directory}/" "${TRAVIS_AUTO_PUSH_REPO_DIR}/"
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git add -A . && git commit --allow-empty -m "Auto-publish to $deploy_branch") > commit.log || (cat commit.log && exit 1)
   (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && git log --oneline --decorate --graph -10)
   echo '(cd '"$TRAVIS_AUTO_PUSH_REPO_DIR"' && git push --force --quiet "'"$deploy_repo"'" "'"$deploy_branch"'")'
-  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=${known_hosts_d}/known_hosts" git push --force --quiet "$deploy_repo" "$deploy_branch" >/dev/null 2>&1) >/dev/null 2>&1 # redirect to /dev/null to avoid showing credentials.
-  # Cleanup:
-  rm "${known_hosts_d}/known_hosts"
+  (cd "$TRAVIS_AUTO_PUSH_REPO_DIR" && GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=$travis_known_hosts" git push --force --quiet "$deploy_repo" "$deploy_branch" >/dev/null 2>&1) >/dev/null 2>&1 # redirect to /dev/null to avoid showing credentials.
 fi

@@ -6,17 +6,16 @@ if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
 fi
 os_filename="$1"
 
-img_file="$(./utils/mktemp.sh .img)"
-vbox_dir="$(./utils/mktemp.sh -d .vbox)"
+vbox_dir="$(./utils/mktemp.sh -d)"
 vmname="automatic-os-test-$(date +%s)-$$"
 
-ln -sf "$(readlink -f "$os_filename")" "$img_file"
+ln -sf "$(readlink -f "$os_filename")" "build/virtualbox.img"
 VBoxManage createvm --name "$vmname" --register --basefolder "$vbox_dir"
 VBoxManage modifyvm "$vmname" --hwvirtex off
 VBoxManage modifyvm "$vmname" --nestedpaging off
 VBoxManage modifyvm "$vmname" --pae off
 VBoxManage storagectl "$vmname" --name 'floppy disk drive' --add floppy --bootable on
-VBoxManage storageattach "$vmname" --storagectl 'floppy disk drive' --port 0 --device 0 --type fdd --medium "$img_file"
+VBoxManage storageattach "$vmname" --storagectl 'floppy disk drive' --port 0 --device 0 --type fdd --medium "build/virtualbox.img"
 VBoxManage modifyvm "$vmname" --boot1 floppy
 VBoxManage startvm "$vmname" --type sdl &
 pid=$!
@@ -35,7 +34,6 @@ for i in `seq 10`; do
 done
 
 # Cleanup: remove temporary files and directories.
-rm "$img_file"
 rm "/tmp/$vbox_dir" -fr
 
 exit $exitcode
