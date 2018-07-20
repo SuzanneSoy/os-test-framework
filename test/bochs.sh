@@ -6,14 +6,14 @@ if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
 fi
 os_filename="$1"
 
-bochsrc="$(mktemp)"
+bochsrc="$(./utils/mktemp.sh)"
 cat > "$bochsrc" <<EOF
 floppya: 1_44=${os_filename}, status=inserted
 boot: floppy
 display_library: sdl
 EOF
 
-bochscontinue="$(mktemp)"
+bochscontinue="$(./utils/mktemp.sh)"
 echo "continue" > "$bochscontinue"
 
 bochs -qf "$bochsrc" < "$bochscontinue" &

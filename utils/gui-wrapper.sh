@@ -5,10 +5,10 @@ set -e
 resolution="$1" # e.g. 800x600x24 (width x height x bits_per_pixel)
 shift           # the following arguments are the program to execute and its arguments
 
-bg="$(mktemp tmp.XXXXXXXXXX.xbm)"
-twm_cfg="$(mktemp tmp.XXXXXXXXXX_twm.cfg)"
-twm_session_dir="$(mktemp -d)"
-anim="$(mktemp -d)"
+bg="$(./utils/mktemp.sh .xbm)"
+twm_cfg="$(./utils/mktemp.sh .twm.cfg)"
+twm_session_dir="$(./utils/mktemp.sh -d)"
+anim="$(./utils/mktemp.sh -d)"
 
 # Create checkerboard background
 # Use +level-colors 'gray(192),gray(128)' to choose directly the colors.

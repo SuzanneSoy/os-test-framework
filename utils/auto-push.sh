@@ -65,7 +65,7 @@ else
   ssh-add ~/.ssh/travis-deploy-key-id_rsa
   # TODO: all the config should be in a separate folder, instead of using ~/.ssh for the id_rsa.
   
-  known_hosts_d="$(UMASK=077 mktemp -d)"
+  known_hosts_d="$(UMASK=077 "$(dirname "$0")/mktemp.sh" -d)"
   touch ${known_hosts_d}/known_hosts
   chmod 600 ${known_hosts_d}/known_hosts
   echo "github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> "${known_hosts_d}/known_hosts"

@@ -6,8 +6,8 @@ if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
 fi
 os_filename="$1"
 
-img_file="$(mktemp tmp.XXXXXXXXXX.img)"
-vbox_dir="$(mktemp -d tmp.XXXXXXXXXX_vbox)"
+img_file="$(./utils/mktemp.sh .img)"
+vbox_dir="$(./utils/mktemp.sh -d .vbox)"
 vmname="automatic-os-test-$(date +%s)-$$"
 
 ln -sf "$(readlink -f "$os_filename")" "$img_file"
