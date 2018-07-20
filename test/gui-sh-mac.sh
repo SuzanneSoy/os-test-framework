@@ -12,7 +12,7 @@ os_filename="$(dirname "$1")/$(basename "$1")"
 osascript -e 'tell app "Terminal" to activate'
 osascript -e 'tell app "Terminal" to do script "'"$PWD"'/os.bat"' &
 pid=$!
-runsikulix -r test/check-gui-sh.sikuli && exitcode=$? || exitcode=$?
+runsikulix -r test/check-gui-sh-mac.sikuli && exitcode=$? || exitcode=$?
 
 screencapture "./deploy-screenshots/$(basename "$0" .sh).png"
 
