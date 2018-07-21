@@ -413,8 +413,9 @@ test/macos-sh-x11:
 test/macos-sh: build/check_makefile \
                build/checkerboard_1024x768.png \
                | deploy-screenshots
-	osascript -e 'tell app "Terminal" to activate'
 	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/os.bat"'
+	sleep 2
+	osascript -e 'tell app "Terminal" to activate'
 	sleep 5
 	(date +%n && sleep 0.2 && date +%n) || true
 	screencapture deploy-screenshots/screencapture-os-bat.png
