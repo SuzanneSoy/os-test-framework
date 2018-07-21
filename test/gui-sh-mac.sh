@@ -16,6 +16,6 @@ runsikulix -r test/check-gui-sh-mac.sikuli && exitcode=$? || exitcode=$?
 
 screencapture "./deploy-screenshots/$(basename "$0" .sh).png"
 
-kill $pid
+kill $pid || true
 
 exit $exitcode
