@@ -5,7 +5,7 @@ set -e
 resolution="$1" # e.g. 800x600x24 (width x height x bits_per_pixel)
 shift           # the following arguments are the program to execute and its arguments
 
-bg="$(realpath "build/checkerboard_$(echo "$resolution" | cut -d 'x' -f1-2).png")"
+bg="$(./utils/absolute-path.sh "build/checkerboard_$(echo "$resolution" | cut -d 'x' -f1-2).png")"
 anim="$(./utils/mktemp.sh -d)"
 
 echo "$anim $resolution $@"

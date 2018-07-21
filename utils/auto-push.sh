@@ -65,7 +65,7 @@ else
   eval `ssh-agent -s`
   ssh-add ~/.ssh/travis-deploy-key-id_rsa
 
-  travis_known_hosts="$(realpath "$(dirname "$0")/travis_known_hosts")"
+  travis_known_hosts="$("$(dirname "$0")/absolute-path.sh" "$(dirname "$0")/travis_known_hosts")"
   chmod 600 "$travis_known_hosts"
   echo "$travis_known_hosts"
   cat "$travis_known_hosts"

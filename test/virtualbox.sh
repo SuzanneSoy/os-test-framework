@@ -9,7 +9,7 @@ os_filename="$1"
 vbox_dir="$(./utils/mktemp.sh -d)"
 vmname="automatic-os-test-$(date +%s)-$$"
 
-ln -sf "$(readlink -f "$os_filename")" "build/virtualbox.img"
+ln -sf "$(./utils/absolute-path.sh "$os_filename")" "build/virtualbox.img"
 VBoxManage createvm --name "$vmname" --register --basefolder "$vbox_dir"
 VBoxManage modifyvm "$vmname" --hwvirtex off
 VBoxManage modifyvm "$vmname" --nestedpaging off
