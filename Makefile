@@ -164,7 +164,7 @@ build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/che
 
 define offset
 tmp_${1} = ${3}
-build/offsets/${1}.dec: $${tmp_${1}:%=build/offsets/%.dec} build/check_makefile
+build/offsets/${1}.dec: $${tmp_${1}:%=build/offsets/%.dec} ${4} build/check_makefile
 	echo $$$$(( ${2} )) | tee $$@
 ${1} = $$$$(cat build/offsets/${1}.dec)
 dep_${1} = build/offsets/${1}.dec
