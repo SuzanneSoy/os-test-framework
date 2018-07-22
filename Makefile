@@ -101,7 +101,7 @@ build/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
 build/makefile_w_arnings: Makefile
-	@make -n --warn-undefined-variables test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
 
 # Check that the file build/makefile_w_arnings is present, and that it does not contain the string "warn".
 build/check_makefile_w_arnings: build/makefile_w_arnings
@@ -115,7 +115,7 @@ build/check_makefile: build/check_makefile_w_arnings build/check_makefile_target
 	@touch $@
 
 build/makefile_database: Makefile build/check_makefile_w_arnings
-	@make -rpn | sed -n -e '/^# Make data base,/,$$p' > $@
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn | sed -n -e '/^# Make data base,/,$$p' > $@
 
 build/makefile_database_files: build/makefile_database build/check_makefile_w_arnings
 	@sed -n -e '/^# Files$$/,/^# files hash-table stats:$$/p' $< > $@
