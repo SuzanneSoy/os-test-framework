@@ -38,6 +38,24 @@ matrix:
             - bochs-sdl
             - dosbox
     - os: linux
+      env: MODE=gui-sh
+      sudo: false
+      addons:
+        apt:
+          packages:
+            - *common_apt_packages
+    - os: linux
+      env: MODE=dosbox
+      sudo: false
+      addons:
+        apt:
+          packages:
+            - *common_apt_packages
+            - dosbox
+    - os: osx
+      env: MODE=osx-test # Ensure that the Makefile works. Check that the generated os.bat works in sh mode
+      install: make all test/noemu test/macos
+    - os: linux
       env: MODE=qemu-system-i386-floppy
       sudo: false
       addons:
@@ -81,26 +99,6 @@ matrix:
           packages:
             - *common_apt_packages
             - bochs-sdl
-    - os: linux
-      env: MODE=gui-sh
-      sudo: false
-      addons:
-        apt:
-          packages:
-            - *common_apt_packages
-    - os: linux
-      env: MODE=dosbox
-      sudo: false
-      addons:
-        apt:
-          packages:
-            - *common_apt_packages
-            - dosbox
-    - os: osx
-      env: MODE=osx-test # Ensure that the Makefile works. Check that the generated os.bat works in sh mode
-      install: make all test/noemu test/macos
-      # TODO: install sikulix
-      # TODO: test in SH mode
 
 before_install:
   - brew install cdrtools    || true
