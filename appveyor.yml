@@ -1,0 +1,62 @@
+max_jobs: 1
+# Are both necessary?
+shallow_clone: true
+clone_depth: 1
+
+image: Visual Studio 2015
+
+environment:
+  some_secure_variable:
+    secure: base64ab
+
+install:
+  - cmd: set PATH=C:\cygwin\bin;C:\cygwin\usr\bin;%PATH%
+  # nasm
+  - cmd: curl -O https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win32/nasm-2.13.03-win32.zip
+  - cmd: unzip nasm-2.13.03-win32.zip
+  - cmd: set PATH=%cd%\nasm-2.13.03\;%PATH%
+  # gdisk
+  - cmd: mkdir gdisk
+  - cmd: cd gdisk
+  - cmd: curl -o gdisk.zip https://freefr.dl.sourceforge.net/project/gptfdisk/gptfdisk/1.0.4/gdisk-binaries/gdisk-windows-1.0.4.zip
+  - cmd: unzip gdisk.zip
+  - cmd: ln -s gdisk64.exe gdisk.exe
+  - cmd: cd ..
+  - cmd: set PATH=%cd%\gdisk\;%PATH%
+  # mkisofs,zip,ImageMagick
+  - cmd: C:\cygwin\setup-x86.exe --no-replaceonreboot --no-shortcuts --quiet-mode --root c:\cygwin --packages mkisofs,genisoimage,zip,ImageMagick,xorg-server-extra
+  - cmd: C:\cygwin\bin\find C:\cygwin -iname "import*"
+  - cmd: C:\cygwin\bin\find C:\cygwin -iname "convert*"
+  # mtools
+  - cmd: curl -O ftp://ftp.gnu.org/gnu/mtools/mtools-4.0.18.tar.gz
+  - cmd: tar -zxf mtools-4.0.18.tar.gz
+  - cmd: cd mtools-4.0.18
+  - cmd: sh configure --build=x86_64-pc-windows
+  - cmd: make
+  - cmd: cd ..
+  - cmd: set PATH=%cd%\mtools-4.0.18\;%PATH%
+  # Print versions and other tool information
+  - cmd: echo %cd%
+  - cmd: make --version
+  - cmd: nasm -v
+  - cmd: mtools --version
+  - cmd: mtools & exit 0
+  - cmd: sh -c "mkisofs --version"
+  - cmd: zip --help
+  - cmd: unzip -h
+  - cmd: sh -c "(printf | gdisk) || true; echo"
+  - cmd: sh -c "import --version"
+  # Xvfb is installed via cygwin package xorg-server-extra
+  - cmd: Xvfb -help
+  - cmd: ssh -V
+  - cmd: echo TODO install gnu make and dependencies
+
+build_script:
+  - cmd: make all
+
+test_script:
+  - cmd: echo test command using batch
+  - ps: Write-Host 'or using PowerShell'
+
+#artifacts:
+#  - path: path/to/file_or_directory_to_zip
