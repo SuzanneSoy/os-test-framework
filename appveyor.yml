@@ -37,6 +37,11 @@ install:
   - cmd: set PATH=%cd%\mtools-4.0.18\;%PATH%
   # Print versions and other tool information
   - cmd: echo %cd%
+  - cmd: uname -s
+  - cmd: uname -r
+  - cmd: uname -v
+  - cmd: uname -m
+  - cmd: uname -o
   - cmd: make --version
   - cmd: nasm -v
   - cmd: mtools --version
