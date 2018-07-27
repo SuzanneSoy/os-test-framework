@@ -84,7 +84,10 @@ times (34*512)-($-$$) db 0
 
 ;;; End of line for MS-DOS, so that it correctly processes the GOTO instruction
 db 0x0d, 0x0a
-db "GOTO msdos", 0x0d, 0x0a
+;;; For some reason, MS-DOS seems to ignore this line, so we leave an empty comment there.
+db "::"
+db 0x0d, 0x0a
+db "@GOTO msdos", 0x0d, 0x0a
 
 ;;; After the bootsector, close the sh here-document skipped via : <<'EOF'
 db 0x0a
@@ -105,8 +108,8 @@ db "while :; do sleep 1; done", 0x0a
 db 0x0d, 0x0a
 db ":msdos", 0x0d, 0x0a
 db "@cls", 0x0d, 0x0a
-db "echo Hello world by the OS, from MS-DOS!", 0x0d, 0x0a
-db "@goto %1 :pause", 0x0d, 0x0a
+db "@echo Hello world by the OS, from MS-DOS!", 0x0d, 0x0a
+db "@GOTO %1 pause", 0x0d, 0x0a
 db ":pause", 0x0d, 0x0a
 db "@pause", 0x0d, 0x0a
 db ":exit", 0x0d, 0x0a

@@ -60,8 +60,10 @@ build_script:
   - cmd: make all
 
 test_script:
-  - cmd: echo test command using batch
-  - ps: Write-Host 'or using PowerShell'
+  - cmd: cmd /C os.bat exit
+  - cmd: sh os.bat exit
+  # The next command actually runs the script as a MS-DOS batch file
+  - cmd: sh -c './os.bat exit'
 
 #artifacts:
 #  - path: path/to/file_or_directory_to_zip
