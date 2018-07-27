@@ -76,8 +76,8 @@
 /build/offsets/tracks_zip_size.hex
 /build/os.32k
 /build/os.fat12
-/build/os.fdisk
 /build/os.file
+/build/os.gdisk
 /build/os.hex_with_offsets
 /build/os.iso
 /build/os.ndisasm.disasm

@@ -113,7 +113,6 @@ before_install:
   - zip --help               || true
   - unzip --version          || true
   - gdisk --version          || true
-  - fdisk --version          || true
   - import --version         || true
   - Xvfb -h                  || true
   - ssh -V                   || true

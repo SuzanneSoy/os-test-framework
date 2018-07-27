@@ -63,7 +63,7 @@ built_files = ${os_filename} \
               build/os.reasm.asm \
               build/os.reasm \
               build/os.file \
-              build/os.fdisk \
+              build/os.gdisk \
               build/os.zip \
               build/os.zip.adjusted \
               build/os.iso \
@@ -97,7 +97,7 @@ os_floppy_chs_s = 9
 
 .PHONY: all
 # all: os.arm.disasm
-all: ${os_filename} build/os.ndisasm.disasm build/os.reasm.asm build/os.file build/os.fdisk build/os.offsets build/os.hex_with_offsets .gitignore build/check_makefile ${more_offset_dec} ${more_offset_hex}
+all: ${os_filename} build/os.ndisasm.disasm build/os.reasm.asm build/os.file build/os.gdisk build/os.offsets build/os.hex_with_offsets .gitignore build/check_makefile ${more_offset_dec} ${more_offset_hex}
 
 build/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
@@ -292,7 +292,7 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 build/os.file: ${os_filename} build/check_makefile
 	file -kr $< > $@
 
-build/os.fdisk: ${os_filename} build/check_makefile
+build/os.gdisk: ${os_filename} build/check_makefile
 #       gdisk commands:
 #         * Print partition table
 #         * Recovery and transformation options
