@@ -281,7 +281,8 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 #           * add GPT partition #1 to the hybrid MBR, do Not put the EFI partition first,
 #           * MBR partition type=0x01, bootable=Yes, do Not add extra partitions,
 #         * Print GPT, print MBR, Write, Proceed.
-	(printf "d\nx\nl\n1\nm\nn\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\n0700\n"; \
+	(if test "$$(uname -o)" = "Cygwin"; then printf "Y\n"; fi; \
+	 printf "d\nx\nl\n1\nm\nn\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\n0700\n"; \
 	 printf "r\nh\n"; \
 	 printf "1\nN\n"; \
 	 printf "01\nY\nN\n"; \
