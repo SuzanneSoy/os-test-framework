@@ -1,5 +1,7 @@
 /build/bochscontinue
 /build/bochsrc
+/build/checkerboard_1024x768.png
+/build/checkerboard_800x600.xbm
 /build/check_makefile
 /build/check_makefile_targets
 /build/check_makefile_w_arnings

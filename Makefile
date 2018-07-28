@@ -48,6 +48,8 @@ built_files = ${os_filename} \
               build/check_makefile \
               build/check_makefile_targets \
               build/check_makefile_w_arnings \
+              build/checkerboard_800x600.xbm \
+              build/checkerboard_1024x768.png \
               build/makefile_built_directories \
               build/makefile_built_files \
               build/makefile_database \
