@@ -81,7 +81,8 @@
 /build/os.hex_with_offsets
 /build/os.iso
 /build/os.ndisasm.disasm
-/build/os.offsets
+/build/os.offsets.dec
+/build/os.offsets.hex
 /build/os.reasm
 /build/os.reasm.asm
 /build/os.zip

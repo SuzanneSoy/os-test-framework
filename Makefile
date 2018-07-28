@@ -69,7 +69,8 @@ built_files = ${os_filename} \
               build/os.iso \
               build/os.32k \
               build/os.fat12 \
-              build/os.offsets \
+              build/os.offsets.hex \
+              build/os.offsets.dec \
               build/os.hex_with_offsets \
               build/iso_files/os.zip \
               build/iso_files/boot/iso_boot.sys \
@@ -97,7 +98,7 @@ os_floppy_chs_s = 9
 
 .PHONY: all
 # all: os.arm.disasm
-all: ${os_filename} build/os.ndisasm.disasm build/os.reasm.asm build/os.file build/os.gdisk build/os.offsets build/os.hex_with_offsets .gitignore build/check_makefile ${more_offset_dec} ${more_offset_hex}
+all: ${os_filename} build/os.ndisasm.disasm build/os.reasm.asm build/os.file build/os.gdisk build/os.offsets.hex build/os.offsets.dec build/os.hex_with_offsets .gitignore build/check_makefile ${more_offset_dec} ${more_offset_hex}
 
 build/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
@@ -300,15 +301,18 @@ build/os.gdisk: ${os_filename} build/check_makefile
 #         * Quit
 	printf 'p\nr\no\nq\n' | gdisk $< | tee $@
 
-build/os.offsets: ${offset_names:%=build/offsets/%.hex} build/check_makefile
-	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' > $@
+build/os.offsets.hex: ${offset_names:%=build/offsets/%.hex} build/check_makefile
+	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' | column -t > $@
+
+build/os.offsets.dec: ${offset_names:%=build/offsets/%.dec} build/check_makefile
+	grep '^' ${offset_names:%=build/offsets/%.dec} | sed -e 's/:/: /' | column -t > $@
 
 build/offsets/%.hex: build/offsets/%.dec
 	printf '%x\n' $$(cat $<) > $@
 
-build/os.hex_with_offsets: ${os_filename} build/os.offsets
+build/os.hex_with_offsets: ${os_filename} build/os.offsets.hex
 	hexdump -C $< \
-	 | grep -E -e "($$(cat build/os.offsets | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
+	 | grep -E -e "($$(cat build/os.offsets.hex | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
 
 build/os.ndisasm.disasm: ${os_filename} utils/compact-ndisasm.sh build/check_makefile
 	./utils/compact-ndisasm.sh $< $@
