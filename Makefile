@@ -258,6 +258,7 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
                 ${dep_bytes_header_32k_size} \
                 ${dep_bytes_fat12_start} \
                 ${dep_bytes_fat12_size} \
+                ${dep_bytes_gpt_mirror_start} \
                 ${dep_bytes_gpt_mirror_end} \
                 ${dep_sectors_fat12_start} \
                 ${dep_sectors_fat12_size} \
@@ -287,6 +288,14 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 	 printf "1\nN\n"; \
 	 printf "01\nY\nN\n"; \
 	 printf "p\no\nw\nY\n") | while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done | gdisk $@
+# Inject MS-DOS newlines (CR+LF) and comments (":: ") in the GUID field of unused partition table entries,
+# so that the part that is to be skipped by MS-DOS does not form a line longer than the MS-DOS maximum
+# line length (8192 excluding CR+LF). $i below is the partition entry number, starting from 1
+# The numbers 55 and 118 are arbitrarily chosen so that the space between two CR+LF is less than 8192.
+	for i in 55 118; do \
+	  printf "\r\n:: %02x" $$i | dd bs=1 seek=$$(( 1024 + ( ($$i) - 1) * 128 + 16)) count=7 conv=notrunc of=$@; \
+	  printf "\r\n:: %02x" $$i | dd bs=1 seek=$$(( ${bytes_gpt_mirror_start} + ( ($$i) - 1) * 128 + 16)) count=7 conv=notrunc of=$@; \
+	done
 # splice in zip at the end
 	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=build/os.zip.adjusted of=$@
 	chmod a+x-w $@

@@ -3,7 +3,17 @@
 
 db "#!/usr/bin/env sh", 0x0a
 db ": <<'EOF'", 0x0a
-db "GOTO msdos", 0x0a
+;;; Starting from here until EOF, all data is effectively ignored by Unix shells
+;;; End of line for MS-DOS, so that it correctly processes the comment
+db 0x0d, 0x0a
+
+;;; The GOTO target must not be more than one block away (512 bytes by default
+;;; on some systems) apparently, so it is impractical since the target is
+;;; so far away in our case. Instead, we use a comment, but if there are some
+;;; compatibility issues with the comment syntax, we could likely still use
+;;; GOTO and insert intermediate jump points.
+;; db "GOTO msdos", 0x0d, 0x0a
+db ":: "
 
 ;;; The #!… above is interpreted as … jnz short 0x7c78 in x86 assembly.
 times 0x7c78-0x7c00-($-$$) db 0
@@ -66,24 +76,44 @@ db 0x55, 0xaa  ;; 0x1fe End the bootsector with 55 AA, which is the MBR signatur
 ;;; Leave some space for the GPT header and partition table entries (LBA0 = MBR, LBA1 = header, LBA2..33 = GPT partition tables)
 times (34*512)-($-$$) db 0
 
+;;; The MS-DOS maximum line length is 8192 (excluding the \r\n),
+;;; but the GPT partition table is a bit more than 16384 bytes long.
+;;; We therefore inject in the Makefile intermediate \r\n in some
+;;; unused partition entries, after the disk image has been
+;;; partitioned using gdisk.
+
+;;; End of line for MS-DOS, so that it correctly processes the GOTO instruction
+db 0x0d, 0x0a
+db "GOTO msdos", 0x0d, 0x0a
+
 ;;; After the bootsector, close the sh here-document skipped via : <<'EOF'
 db 0x0a
 db "EOF", 0x0a
 db "echo Hello world by the OS, from sh!", 0x0a
-db "while sleep 10; do :; done", 0x0a
+db "if test $# -ge 1 && test ", 0x22, "$1", 0x22, " = exit", 0x0a
+db "then", 0x0a
+db ":", 0x0a
+db "else", 0x0a
+db "while sleep 10", 0x0a, "do", 0x0a, ":", 0x0a, "done", 0x0a
+db "fi", 0x0a
 db "exit", 0x0a
 ;;; for good measure: go into an infinite loop if the exit did not happen.
 db "while :; do sleep 1; done", 0x0a
 
-;;; end of the SH section, everything until this point is skipped by MS-DOS batch due to the GOTO'
-db ":msdos", 0x0a
-db "@cls", 0x0a
-db "@echo Hello world by the OS, from MS-DOS!", 0x0a
-db "command.com", 0x0a
-db "exit", 0x0a
+;;; end of the SH section, everything until this point is skipped by MS-DOS batch due to the GOTO
+;;; End of line for MS-DOS, so that it correctly processes the :msdos label
+db 0x0d, 0x0a
+db ":msdos", 0x0d, 0x0a
+db "@cls", 0x0d, 0x0a
+db "echo Hello world by the OS, from MS-DOS!", 0x0d, 0x0a
+db "@goto %1 :pause", 0x0d, 0x0a
+db ":pause", 0x0d, 0x0a
+db "@pause", 0x0d, 0x0a
+db ":exit", 0x0d, 0x0a
+db "@exit 0", 0x0d, 0x0a
 ;;; for good measure: go into an infinite loop if the exit did not happen.
-db ":loop", 0x0a
-db "GOTO loop", 0x0a
+db ":loop", 0x0d, 0x0a
+db "@GOTO loop", 0x0d, 0x0a
 
 ;;; Fill up to 32k with 0. This constitutes the reserved first 32k at the beginning of an ISO9660 image.
 times (32*1024)-($-$$) db 0
