@@ -406,8 +406,13 @@ build/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} build/
 
 build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_iso
 	sudo umount build/mnt_iso || true
-	sudo mount -o loop,ro $< build/mnt_iso
+	grep '^' build/offsets/* # debug failure to mount the ISO9660 filesystem
+	(sudo mount -o loop,ro $< build/mnt_iso) || true
+	dmesg | tail # debug failure to mount the ISO9660 filesystem
+	hexdump -C os.bat
 	ls -l build/mnt_iso | grep os.zip
+	sudo umount build/mnt_iso
+	sudo mount -o loop,ro $< build/mnt_iso
 	sudo umount build/mnt_iso
 	touch $@
 
