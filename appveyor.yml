@@ -35,6 +35,8 @@ install:
   - cmd: make
   - cmd: cd ..
   - cmd: set PATH=%cd%\mtools-4.0.18\;%PATH%
+  # sikulix
+  - cmd: sh utils\install-sikulix.sh
   # Print versions and other tool information
   - cmd: echo %cd%
   - cmd: uname -s
