@@ -11,6 +11,10 @@ environment:
 
 install:
   - cmd: set PATH=C:\cygwin\bin;C:\cygwin\usr\bin;%PATH%
+  # screenshot-cmd https://code.google.com/archive/p/screenshot-cmd/
+  - cmd: mkdir screenshot-cmd
+  - cmd: curl -o screenshot-cmd\screenshot-cmd.exe https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/screenshot-cmd/screenshot-cmd.exe
+  - cmd: set PATH=%cd%\screenshot-cmd\;%PATH%
   # nasm
   - cmd: curl -O https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win32/nasm-2.13.03-win32.zip
   - cmd: unzip nasm-2.13.03-win32.zip
@@ -56,7 +60,7 @@ install:
   # Xvfb is installed via cygwin package xorg-server-extra
   - cmd: Xvfb -help
   - cmd: ssh -V
-  - cmd: echo TODO install gnu make and dependencies
+  - cmd: screenshot-cmd -h & exit 0
 
 build_script:
   - cmd: make all
@@ -66,6 +70,11 @@ test_script:
   - cmd: sh os.bat exit
   # The next command actually runs the script as a MS-DOS batch file
   - cmd: sh -c './os.bat exit'
+  - cmd: screenshot-cmd -o screenshot.png
+  - cmd: identify screenshot.png
 
 #artifacts:
 #  - path: path/to/file_or_directory_to_zip
+
+artifacts:
+  - path: screenshot.png
