@@ -1,4 +1,5 @@
 language: c
+
 addons:
   apt:
     packages: &common_apt_packages
@@ -125,8 +126,8 @@ install:
 script:
   - make test/${MODE}
   - |
-    ./utils/auto-push.sh "https://github.com/jsmaniac/travis-os.git" \
-                         "git@github.com:jsmaniac/travis-os-deploy-artifacts.git" \
+    ./utils/auto-push.sh "https://github.com/jsmaniac/os-test-framework.git" \
+                         "git@github.com:jsmaniac/os-test-framework-deploy-artifacts.git" \
                          "screenshots-$TRAVIS_BRANCH-$MODE" \
                          "deploy-base" \
                          "edf345aad47e" \
