@@ -61,6 +61,7 @@ matrix:
         - brew install mtools
         - brew cask install gdisk
         - brew install imagemagick # --with-x11
+        - brew install libfaketime
       script: make all test/noemu test/macos
     - os: linux
       env: MODE=qemu-system-i386-floppy
@@ -120,6 +121,7 @@ install:
   - import --version || test "$MODE" = osx-test # import --version has a non-zero exit code on the Travis installation
   - Xvfb -help
   - ssh -V
+  - faketime --version
   - ./utils/install-sikulix.sh
   - export PATH="$HOME/sikulix/:$PATH"
   - if test "$MODE" = virtualbox -o "$MODE" = self-test; then ./utils/install-virtualbox.sh; fi

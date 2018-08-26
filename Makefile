@@ -2,14 +2,15 @@ MAKEFLAGS = --warn-undefined-variables
 SHELL = bash -euET -o pipefail -c
 .SECONDEXPANSION:
 
-os_filename = os.bat
-BUILD_DIR   = build
-bld         = ${BUILD_DIR}
+OS_FILENAME  = os.bat
+os_filename  = ${OS_FILENAME}
+BUILD_DIR    = build
+bld          = ${BUILD_DIR}
 tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 tests_requiring_sudo = test/fat12_mount test/iso_mount
-tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents
+tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents test/reproducible_build
 
-commit_timestamp = "$$(git log -1 --pretty=format:%ad --date=iso8601-strict)"
+commit_timestamp = "$$(git log -1 --pretty=format:%ad --date=format:"%Y%m%d%H%m.%S")"
 commit_faketime  = "$$(git log -1 --pretty=format:%ad --date=format:"%Y-%m-%d %H:%m:%S")"
 
 offset_names = bytes_os_size \
@@ -46,6 +47,8 @@ more_offset_names = ${offset_names} \
 
 more_offset_dec = ${more_offset_names:%=${bld}/offsets/%.dec}
 more_offset_hex = ${more_offset_names:%=${bld}/offsets/%.hex}
+
+reproducible_os_filename="${bld}/reproducible_$$(basename "${os_filename}")"
 
 # + os.arm.disasm
 # + os.reasm.disasm
@@ -134,7 +137,7 @@ ${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
 ${bld}/makefile_w_arnings: Makefile
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables BUILD_DIR=${BUILD_DIR} test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables OS_FILENAME=${OS_FILENAME} BUILD_DIR=${BUILD_DIR} test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
 
 # Check that the file ${bld}/makefile_w_arnings is present, and that it does not contain the string "warn".
 ${bld}/check_makefile_w_arnings: ${bld}/makefile_w_arnings
@@ -148,7 +151,7 @@ ${bld}/check_makefile: ${bld}/check_makefile_w_arnings ${bld}/check_makefile_tar
 	@touch $@
 
 ${bld}/makefile_database: Makefile ${bld}/check_makefile_w_arnings
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn BUILD_DIR=${BUILD_DIR} | sed -n -e '/^# Make data base,/,$$p' > $@
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn OS_FILENAME=${OS_FILENAME} BUILD_DIR=${BUILD_DIR} | sed -n -e '/^# Make data base,/,$$p' > $@
 
 ${bld}/makefile_database_files: ${bld}/makefile_database ${bld}/check_makefile_w_arnings
 	@sed -n -e '/^# Files$$/,/^# files hash-table stats:$$/p' $< > $@
@@ -181,7 +184,7 @@ ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 
 ${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ${bld}/check_makefile
 	cp -a -- ${bld}/iso_files ${bld}/iso_files.tmp
-	find ${bld}/iso_files.tmp -depth -exec touch -d ${commit_timestamp} '{}' ';'
+	find ${bld}/iso_files.tmp -depth -exec touch -t ${commit_timestamp} '{}' ';'
 	faketime -f ${commit_faketime} mkisofs \
 	 --input-charset utf-8 \
 	 -rock \
@@ -220,12 +223,12 @@ ${eval ${call offset,sectors_os_size,   $${bytes_os_size}    / $${sector_size}, 
 ${eval ${call offset,tracks_os_size,    $${sectors_os_size}  / $${os_floppy_chs_s},                    sectors_os_size,}}
 
 # round up
-${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c ${bld}/os.iso),                   ,${bld}/os.iso}}
+${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c ${bld}/os.iso),             ,${bld}/os.iso}}
 ${eval ${call offset,sectors_iso_size,  ${call div_round_up,$${bytes_iso_size},$${sector_size}},       bytes_iso_size,}}
 ${eval ${call offset,tracks_iso_size,   ${call div_round_up,$${sectors_iso_size},$${os_floppy_chs_s}}, sectors_iso_size,}}
 
 # round up
-${eval ${call offset,bytes_zip_size,    $$$$(utils/file-length.sh -c ${bld}/os.zip),                   ,${bld}/os.zip}}
+${eval ${call offset,bytes_zip_size,    $$$$(utils/file-length.sh -c ${bld}/os.zip),             ,${bld}/os.zip}}
 ${eval ${call offset,sectors_zip_size,  ${call div_round_up,$${bytes_zip_size},$${sector_size}},       bytes_zip_size,}}
 ${eval ${call offset,tracks_zip_size,   ${call div_round_up,$${sectors_zip_size},$${os_floppy_chs_s}}, sectors_zip_size,}}
 
@@ -285,7 +288,7 @@ ${bld}/os.zip: ${bld}/os.32k ${bld}/check_makefile
 #	builds.
 	mkdir -p ${bld}/os.32k.tmp
 	cp -a $< ${bld}/os.32k.tmp/os.32k
-	touch -d ${commit_timestamp} ${bld}/os.32k.tmp/os.32k
+	touch -t ${commit_timestamp} ${bld}/os.32k.tmp/os.32k
 	(cd ${bld}/os.32k.tmp/ && zip -X ../os.zip os.32k)
 	rm ${bld}/os.32k.tmp/os.32k
 	rmdir ${bld}/os.32k.tmp
@@ -298,10 +301,10 @@ ${bld}/os.zip.adjusted: ${bld}/os.zip ${dep_bytes_zip_start} ${bld}/check_makefi
 
 gdisk_pipe_commands_slowly=while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done
 
-commit_hash_as_guid=$(git log -1 --pretty=format:%H | sed -e 's/^\(.\{8\}\)\(.\{4\}\)\(.\{4\}\)\(.\{4\}\)\(.\{12\}\).*$$/\1-\2-\3-\4-\5/' | tr '[:lower:]' '[:upper:]')
+commit_hash_as_guid=$$(git log -1 --pretty=format:%H | sed -e 's/^\(.\{8\}\)\(.\{4\}\)\(.\{4\}\)\(.\{4\}\)\(.\{12\}\).*$$/\1-\2-\3-\4-\5/' | tr '[:lower:]' '[:upper:]')
 git_dirty=test -n "$$(git diff --shortstat)"
-gpt_disk_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '0'; else printf '2'; fi)
-gpt_partition_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '1'; else printf '3'; fi)
+gpt_disk_guid=${commit_hash_as_guid}$$(if $$git_dirty; then printf '0'; else printf '2'; fi)
+gpt_partition_guid=${commit_hash_as_guid}$$(if $$git_dirty; then printf '1'; else printf '3'; fi)
 
 ${os_filename}: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 ${bld}/os.zip.adjusted \
                 ${dep_bytes_header_32k_start} \
@@ -405,7 +408,11 @@ ${bld}/test_pass/noemu_%.reasm ${bld}/%.reasm: ${bld}/%.reasm.asm ${os_filename}
 
 .PHONY: clean
 clean: ${bld}/check_makefile
-	rm -f ${built_files} ${temp_files}
+	rm -f ${built_files} ${temp_files} ${bld}/reproducible_${os_filename}
+	if test -d ${bld}/reproducible; then \
+	  unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	    make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean; \
+	fi
 	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
           if test -e "$$d"; then \
             rmdir "$$d"; \
@@ -422,8 +429,15 @@ test: ${tests_emu:test/%=${bld}/test_pass/emu_%} \
       all \
       ${bld}/check_makefile
 
-.PHONY: ${tests_emu}
-${tests_emu}: ${bld}/test_pass/emu_$$(@F)
+.PHONY: test/emu test/noemu test/requiring_sudo
+test/emu:            ${tests_emu}            ${bld}/check_makefile
+test/requiring_sudo: ${tests_requiring_sudo} ${bld}/check_makefile
+test/noemu:          ${tests_noemu}          ${bld}/check_makefile
+
+.PHONY: ${tests_emu} ${tests_noemu} ${tests_requiring_sudo}
+${tests_emu}:            ${bld}/test_pass/emu_$$(@F)   ${bld}/check_makefile
+${tests_noemu}:          ${bld}/test_pass/noemu_$$(@F) ${bld}/check_makefile
+${tests_requiring_sudo}: ${bld}/test_pass/sudo_$$(@F)  ${bld}/check_makefile
 
 ${bld}/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
  ${os_filename} \
@@ -434,9 +448,6 @@ ${bld}/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
  | ${bld}/test_pass deploy-screenshots
 	./utils/gui-wrapper.sh 800x600x24 ./test/$*.sh $<
 	touch ${bld}/test_pass/emu_$*
-
-.PHONY: test/noemu
-test/noemu: ${tests_noemu:test/%=build/test_pass/noemu_%} build/check_makefile
 
 ${bld}/test_pass/noemu_zip: ${os_filename} ${bld}/check_makefile
 	unzip -t ${os_filename}
@@ -517,5 +528,25 @@ ${bld}/checkerboard_%.xbm: ${bld}/check_makefile
 	        $@
 
 # Temporary files
-${bld}/bochsrc ${bld}/bochscontinue ${bld}/twm_cfg ${bld}/virtualbox.img:
+${bld}/bochsrc ${bld}/bochscontinue ${bld}/twm_cfg ${bld}/virtualbox.img: ${bld}/check_makefile
+	touch $@
+
+# DEBUG: ${bld}/os.hex_with_offsets ${bld}/os.offsets.hex
+${bld}/test_pass/noemu_reproducible_build: ${os_filename} ${bld}/os.hex_with_offsets ${bld}/check_makefile
+#       Let some time pass so that any timestamp that may affect the result changes.
+	sleep 5
+#       TODO: try to see if we can re-enable some of these variables without
+#             causing problems on macos.
+	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean
+	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible ${reproducible_os_filename} \
+                                                                                     ${bld}/reproducible/os.hex_with_offsets
+#       Check that the second build produced the same file.
+	if ! diff ${os_filename} ${reproducible_os_filename}; then \
+	  diff ${bld}/os.hex_with_offsets ${bld}/reproducible/os.hex_with_offsets || true; \
+	  exit 1; \
+	fi
+	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean
 	touch $@
