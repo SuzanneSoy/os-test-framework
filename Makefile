@@ -3,6 +3,8 @@ SHELL = bash -euET -o pipefail -c
 .SECONDEXPANSION:
 
 os_filename = os.bat
+BUILD_DIR   = build
+bld         = ${BUILD_DIR}
 tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents
@@ -42,63 +44,69 @@ more_offset_names = ${offset_names} \
                     tracks_os_size \
                     tracks_zip_size
 
-more_offset_dec = ${more_offset_names:%=build/offsets/%.dec}
-more_offset_hex = ${more_offset_names:%=build/offsets/%.hex}
+more_offset_dec = ${more_offset_names:%=${bld}/offsets/%.dec}
+more_offset_hex = ${more_offset_names:%=${bld}/offsets/%.hex}
 
 # + os.arm.disasm
 # + os.reasm.disasm
 built_files = ${os_filename} \
-              build/check_makefile \
-              build/check_makefile_targets \
-              build/check_makefile_w_arnings \
-              build/checkerboard_800x600.xbm \
-              build/checkerboard_1024x768.png \
-              build/makefile_built_directories \
-              build/makefile_built_files \
-              build/makefile_database \
-              build/makefile_database_files \
-              build/makefile_file_targets \
-              build/makefile_non_file_targets \
-              build/makefile_phony \
-              build/makefile_targets \
-              build/makefile_w_arnings \
-              build/os.ndisasm.disasm \
-              build/os.reasm.asm \
-              build/os.reasm \
-              build/os.file \
-              build/os.gdisk \
-              build/os.zip \
-              build/os.zip.adjusted \
-              build/os.iso \
-              build/os.32k \
-              build/os.fat12 \
-              build/os.offsets.hex \
-              build/os.offsets.dec \
-              build/os.hex_with_offsets \
-              build/iso_files/os.zip \
-              build/iso_files/boot/iso_boot.sys \
-              build/bochsrc \
-              build/bochscontinue \
-              build/twm_cfg \
-              build/virtualbox.img \
+              ${bld}/check_makefile \
+              ${bld}/check_makefile_targets \
+              ${bld}/check_makefile_w_arnings \
+              ${bld}/checkerboard_800x600.xbm \
+              ${bld}/checkerboard_1024x768.png \
+              ${bld}/makefile_built_directories \
+              ${bld}/makefile_built_files \
+              ${bld}/makefile_database \
+              ${bld}/makefile_database_files \
+              ${bld}/makefile_file_targets \
+              ${bld}/makefile_non_file_targets \
+              ${bld}/makefile_phony \
+              ${bld}/makefile_targets \
+              ${bld}/makefile_w_arnings \
+              ${bld}/os.ndisasm.disasm \
+              ${bld}/os.reasm.asm \
+              ${bld}/os.reasm \
+              ${bld}/os.file \
+              ${bld}/os.gdisk \
+              ${bld}/os.zip \
+              ${bld}/os.zip.adjusted \
+              ${bld}/os.iso \
+              ${bld}/os.32k \
+              ${bld}/os.fat12 \
+              ${bld}/os.offsets.hex \
+              ${bld}/os.offsets.dec \
+              ${bld}/os.hex_with_offsets \
+              ${bld}/iso_files/os.zip \
+              ${bld}/iso_files/boot/iso_boot.sys \
+              ${bld}/bochsrc \
+              ${bld}/bochscontinue \
+              ${bld}/twm_cfg \
+              ${bld}/virtualbox.img \
               ${more_offset_dec} \
               ${more_offset_hex} \
-              ${tests_emu:test/%=build/test_pass/emu_%} \
-              ${tests_noemu:test/%=build/test_pass/noemu_%} \
-              ${tests_requiring_sudo:test/%=build/test_pass/sudo_%} \
+              ${tests_emu:test/%=${bld}/test_pass/emu_%} \
+              ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
+              ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
               ${tests_emu:test/%=deploy-screenshots/%.png} \
               ${tests_emu:test/%=deploy-screenshots/%-anim.gif}
 
 # Temporary copies used to adjust timestamps for reproducible builds.
 # These are normally created and deleted within a single target, but
 # could remain if make is interrupted during the build.
-temp_files       = build/iso_files.tmp/os.zip \
-                   build/iso_files.tmp/boot/iso_boot.sys
-temp_directories = build/iso_files.tmp \
-                   build/iso_files.tmp/boot/
+temp_files       = ${bld}/iso_files.tmp/os.zip \
+                   ${bld}/iso_files.tmp/boot/iso_boot.sys
+temp_directories = ${bld}/iso_files.tmp \
+                   ${bld}/iso_files.tmp/boot/
 
-built_directories = build/iso_files/boot build/iso_files build/offsets build/mnt_fat12 build/mnt_iso build/test_pass deploy-screenshots
-more_built_directories = ${built_directories} build
+built_directories = ${bld}/iso_files/boot \
+                    ${bld}/iso_files \
+                    ${bld}/offsets \
+                    ${bld}/mnt_fat12 \
+                    ${bld}/mnt_iso \
+                    ${bld}/test_pass \
+                    deploy-screenshots
+more_built_directories = ${built_directories} ${bld}
 
 os_image_size_kb = 1440
 os_partition_start_sectors = 3
@@ -109,60 +117,71 @@ os_floppy_chs_s = 9
 
 .PHONY: all
 # all: os.arm.disasm
-all: ${os_filename} build/os.ndisasm.disasm build/os.reasm.asm build/os.file build/os.gdisk build/os.offsets.hex build/os.offsets.dec build/os.hex_with_offsets .gitignore build/check_makefile ${more_offset_dec} ${more_offset_hex}
+all: ${os_filename} \
+     ${bld}/os.ndisasm.disasm \
+     ${bld}/os.reasm.asm \
+     ${bld}/os.file \
+     ${bld}/os.gdisk \
+     ${bld}/os.offsets.hex \
+     ${bld}/os.offsets.dec \
+     ${bld}/os.hex_with_offsets \
+     .gitignore \
+     ${bld}/check_makefile \
+     ${more_offset_dec} \
+     ${more_offset_hex}
 
-build/makefile_w_arnings: | $${@D}
+${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
-build/makefile_w_arnings: Makefile
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
+${bld}/makefile_w_arnings: Makefile
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables BUILD_DIR=${BUILD_DIR} test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
 
-# Check that the file build/makefile_w_arnings is present, and that it does not contain the string "warn".
-build/check_makefile_w_arnings: build/makefile_w_arnings
-	@cat build/makefile_w_arnings > /dev/null && (! grep -i warn $<) && touch $@
+# Check that the file ${bld}/makefile_w_arnings is present, and that it does not contain the string "warn".
+${bld}/check_makefile_w_arnings: ${bld}/makefile_w_arnings
+	@cat ${bld}/makefile_w_arnings > /dev/null && (! grep -i warn $<) && touch $@
 
 # Check that the declared list of built files matches the list of targets extracted from the Makefile.
-build/check_makefile_targets: build/makefile_built_files build/makefile_file_targets build/check_makefile_w_arnings
-	@diff build/makefile_built_files build/makefile_file_targets && touch $@
+${bld}/check_makefile_targets: ${bld}/makefile_built_files ${bld}/makefile_file_targets ${bld}/check_makefile_w_arnings
+	@diff ${bld}/makefile_built_files ${bld}/makefile_file_targets && touch $@
 
-build/check_makefile: build/check_makefile_w_arnings build/check_makefile_targets
+${bld}/check_makefile: ${bld}/check_makefile_w_arnings ${bld}/check_makefile_targets
 	@touch $@
 
-build/makefile_database: Makefile build/check_makefile_w_arnings
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn | sed -n -e '/^# Make data base,/,$$p' > $@
+${bld}/makefile_database: Makefile ${bld}/check_makefile_w_arnings
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn BUILD_DIR=${BUILD_DIR} | sed -n -e '/^# Make data base,/,$$p' > $@
 
-build/makefile_database_files: build/makefile_database build/check_makefile_w_arnings
+${bld}/makefile_database_files: ${bld}/makefile_database ${bld}/check_makefile_w_arnings
 	@sed -n -e '/^# Files$$/,/^# files hash-table stats:$$/p' $< > $@
 
-build/makefile_built_directories: build/check_makefile_w_arnings
+${bld}/makefile_built_directories: ${bld}/check_makefile_w_arnings
 	@echo ${more_built_directories} | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
-build/makefile_built_files: build/check_makefile_w_arnings
+${bld}/makefile_built_files: ${bld}/check_makefile_w_arnings
 	@echo ${built_files} | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
-build/makefile_phony: build/makefile_database_files build/check_makefile_w_arnings
+${bld}/makefile_phony: ${bld}/makefile_database_files ${bld}/check_makefile_w_arnings
 	@sed -n -e 's/^\.PHONY: \(.*\)$$/\1/p' $< | tr ' ' '\n' | grep -v '^[[:space:]]*$$' | sort > $@
 
-build/makefile_targets: build/makefile_database_files build/check_makefile_w_arnings
+${bld}/makefile_targets: ${bld}/makefile_database_files ${bld}/check_makefile_w_arnings
 	@grep -E -v '^([[:space:]]|#|\.|$$|^[^:]*:$$)' $< | grep '^[^ :]*:' | sed -e 's|^\([^:]*\):.*$$|\1|' | sort > $@
 
-build/makefile_non_file_targets: build/makefile_phony build/makefile_built_directories build/check_makefile_w_arnings
-	@cat build/makefile_phony build/makefile_built_directories | sort > $@
+${bld}/makefile_non_file_targets: ${bld}/makefile_phony ${bld}/makefile_built_directories ${bld}/check_makefile_w_arnings
+	@cat ${bld}/makefile_phony ${bld}/makefile_built_directories | sort > $@
 
-build/makefile_file_targets: build/makefile_non_file_targets build/makefile_targets build/check_makefile_w_arnings
-	@comm -23 build/makefile_targets build/makefile_non_file_targets > $@
+${bld}/makefile_file_targets: ${bld}/makefile_non_file_targets ${bld}/makefile_targets ${bld}/check_makefile_w_arnings
+	@comm -23 ${bld}/makefile_targets ${bld}/makefile_non_file_targets > $@
 
-${built_directories}: build/check_makefile
+${built_directories}: ${bld}/check_makefile
 ${more_built_directories}: Makefile
 	mkdir -p $@ && touch $@
 
 # 32k header of the ISO9660 image
-build/os.32k: example-os/os.asm build/check_makefile
+${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
-build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/check_makefile
-	cp -a -- build/iso_files build/iso_files.tmp
-	find build/iso_files.tmp -depth -exec touch -d ${commit_timestamp} '{}' ';'
+${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ${bld}/check_makefile
+	cp -a -- ${bld}/iso_files ${bld}/iso_files.tmp
+	find ${bld}/iso_files.tmp -depth -exec touch -d ${commit_timestamp} '{}' ';'
 	faketime -f ${commit_faketime} mkisofs \
 	 --input-charset utf-8 \
 	 -rock \
@@ -173,21 +192,21 @@ build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/che
 	 -boot-load-size 4 \
 	 -pad \
 	 -output $@ \
-	 ./build/iso_files.tmp/
-	rm -- build/iso_files.tmp/os.zip \
-              build/iso_files.tmp/boot/iso_boot.sys
-	rmdir build/iso_files.tmp/boot/
-	rmdir build/iso_files.tmp/
+	 ./${bld}/iso_files.tmp/
+	rm -- ${bld}/iso_files.tmp/os.zip \
+              ${bld}/iso_files.tmp/boot/iso_boot.sys
+	rmdir ${bld}/iso_files.tmp/boot/
+	rmdir ${bld}/iso_files.tmp/
 
 # Layout:
 # MBR; GPT; UNIX sh & MS-DOS batch scripts; ISO9660; FAT12; GPT mirror; ZIP
 
 define offset
 tmp_${1} = ${3}
-build/offsets/${1}.dec: $${tmp_${1}:%=build/offsets/%.dec} ${4} build/check_makefile
+${bld}/offsets/${1}.dec: $${tmp_${1}:%=${bld}/offsets/%.dec} ${4} ${bld}/check_makefile
 	echo $$$$(( ${2} )) | tee $$@
-${1} = $$$$(cat build/offsets/${1}.dec)
-dep_${1} = build/offsets/${1}.dec
+${1} = $$$$(cat ${bld}/offsets/${1}.dec)
+dep_${1} = ${bld}/offsets/${1}.dec
 endef
 
 define div_round_up
@@ -201,12 +220,12 @@ ${eval ${call offset,sectors_os_size,   $${bytes_os_size}    / $${sector_size}, 
 ${eval ${call offset,tracks_os_size,    $${sectors_os_size}  / $${os_floppy_chs_s},                    sectors_os_size,}}
 
 # round up
-${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c build/os.iso),                       ,build/os.iso}}
+${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c ${bld}/os.iso),                   ,${bld}/os.iso}}
 ${eval ${call offset,sectors_iso_size,  ${call div_round_up,$${bytes_iso_size},$${sector_size}},       bytes_iso_size,}}
 ${eval ${call offset,tracks_iso_size,   ${call div_round_up,$${sectors_iso_size},$${os_floppy_chs_s}}, sectors_iso_size,}}
 
 # round up
-${eval ${call offset,bytes_zip_size,    $$$$(utils/file-length.sh -c build/os.zip),                       ,build/os.zip}}
+${eval ${call offset,bytes_zip_size,    $$$$(utils/file-length.sh -c ${bld}/os.zip),                   ,${bld}/os.zip}}
 ${eval ${call offset,sectors_zip_size,  ${call div_round_up,$${bytes_zip_size},$${sector_size}},       bytes_zip_size,}}
 ${eval ${call offset,tracks_zip_size,   ${call div_round_up,$${sectors_zip_size},$${os_floppy_chs_s}}, sectors_zip_size,}}
 
@@ -239,7 +258,7 @@ ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes
 ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                                          bytes_os_size,}}
 
 os_fat12_partition = "$@@@${bytes_fat12_start}"
-build/os.fat12: build/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} build/check_makefile
+${bld}/os.fat12: ${bld}/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} ${bld}/check_makefile
 	set -x; dd if=/dev/zero bs=${sector_size} count=${sectors_os_size} of=$@
 	faketime -f ${commit_faketime} mformat -v "Example OS" \
 	 -T ${sectors_fat12_size} \
@@ -248,7 +267,7 @@ build/os.fat12: build/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${
 	 -i ${os_fat12_partition}
 	faketime -f ${commit_faketime} mcopy -i ${os_fat12_partition} $< "::os.zip"
 
-build/iso_files/os.zip: build/os.zip build/check_makefile
+${bld}/iso_files/os.zip: ${bld}/os.zip ${bld}/check_makefile
 # TODO: make it so that the various file formats are mutual quines:
 # * the ISO should contain the original file
 # * the ZIP should contain the original file
@@ -256,22 +275,22 @@ build/iso_files/os.zip: build/os.zip build/check_makefile
 	cp $< $@
 
 # 4 sectors loaded when booting from optical media (CD-ROM, …):
-build/iso_files/boot/iso_boot.sys: build/os.32k build/check_makefile
+${bld}/iso_files/boot/iso_boot.sys: ${bld}/os.32k ${bld}/check_makefile
 # TODO: this copy of the (or alternate) bootsector should contain a Boot Information Table,
 #       see https://wiki.osdev.org/El-Torito#A_BareBones_Boot_Image_with_Boot_Information_Table
 	dd if=$< bs=512 count=4 of=$@
 
-build/os.zip: build/os.32k build/check_makefile
+${bld}/os.zip: ${bld}/os.32k ${bld}/check_makefile
 #	We copy os.32k and alter its timestamp to ensure reproducible
 #	builds.
-	mkdir -p build/os.32k.tmp
-	cp -a $< build/os.32k.tmp/os.32k
-	touch -d ${commit_timestamp} build/os.32k.tmp/os.32k
-	(cd build/os.32k.tmp/ && zip -X ../../build/os.zip os.32k)
-	rm build/os.32k.tmp/os.32k
-	rmdir build/os.32k.tmp
+	mkdir -p ${bld}/os.32k.tmp
+	cp -a $< ${bld}/os.32k.tmp/os.32k
+	touch -d ${commit_timestamp} ${bld}/os.32k.tmp/os.32k
+	(cd ${bld}/os.32k.tmp/ && zip -X ../os.zip os.32k)
+	rm ${bld}/os.32k.tmp/os.32k
+	rmdir ${bld}/os.32k.tmp
 
-build/os.zip.adjusted: build/os.zip ${dep_bytes_zip_start} build/check_makefile
+${bld}/os.zip.adjusted: ${bld}/os.zip ${dep_bytes_zip_start} ${bld}/check_makefile
 # TODO: the ZIP file can end with a variable-length comment, this would allow us to hide the GPT mirrors.
 	set -x; dd if=/dev/zero bs=1 count=${bytes_zip_start} of=$@
 	cat $< >> $@
@@ -284,7 +303,7 @@ git_dirty=test -n "$$(git diff --shortstat)"
 gpt_disk_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '0'; else printf '2'; fi)
 gpt_partition_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '1'; else printf '3'; fi)
 
-${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
+${os_filename}: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 ${bld}/os.zip.adjusted \
                 ${dep_bytes_header_32k_start} \
                 ${dep_bytes_header_32k_size} \
                 ${dep_bytes_fat12_start} \
@@ -294,14 +313,14 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
                 ${dep_sectors_fat12_start} \
                 ${dep_sectors_fat12_size} \
                 ${dep_bytes_zip_start} \
-                build/check_makefile
+                ${bld}/check_makefile
 	rm -f $@
 # start with the .iso
-	cp build/os.iso $@
+	cp ${bld}/os.iso $@
 # splice in the first 32k (bootsector and partition table)
-	set -x; dd skip=${bytes_header_32k_start} seek=${bytes_header_32k_start} bs=1 count=${bytes_header_32k_size} conv=notrunc if=build/os.32k of=$@
+	set -x; dd skip=${bytes_header_32k_start} seek=${bytes_header_32k_start} bs=1 count=${bytes_header_32k_size} conv=notrunc if=${bld}/os.32k of=$@
 # splice in fat12
-	set -x; dd skip=${bytes_fat12_start} seek=${bytes_fat12_start} bs=1 count=${bytes_fat12_size} conv=notrunc if=build/os.fat12 of=$@
+	set -x; dd skip=${bytes_fat12_start} seek=${bytes_fat12_start} bs=1 count=${bytes_fat12_size} conv=notrunc if=${bld}/os.fat12 of=$@
 # pad with zeroes to prepare for GPT table
 	set -x; dd if=/dev/zero seek=$$((${bytes_gpt_mirror_end} - 1 )) bs=1 count=1 conv=notrunc of=$@
 # patch the partition table
@@ -336,13 +355,13 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 	  printf "\r\n:: %02x" $$i | dd bs=1 seek=$$(( ${bytes_gpt_mirror_start} + ( ($$i) - 1) * 128 + 16)) count=7 conv=notrunc of=$@; \
 	done
 # splice in zip at the end
-	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=build/os.zip.adjusted of=$@
+	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=${bld}/os.zip.adjusted of=$@
 	chmod a+x-w $@
 
-build/os.file: ${os_filename} build/check_makefile
+${bld}/os.file: ${os_filename} ${bld}/check_makefile
 	file -kr $< > $@
 
-build/os.gdisk: ${os_filename} build/check_makefile
+${bld}/os.gdisk: ${os_filename} ${bld}/check_makefile
 #       gdisk commands:
 #         * eXpert mode
 #           * Print partition table
@@ -351,41 +370,41 @@ build/os.gdisk: ${os_filename} build/check_makefile
 #           * Quit
 	printf '2\nx\np\ni\nr\no\nq\n' | ${gdisk_pipe_commands_slowly} | gdisk $< | tee $@
 
-build/os.offsets.hex: ${offset_names:%=build/offsets/%.hex} build/check_makefile
-	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' | column -t > $@
+${bld}/os.offsets.hex: ${offset_names:%=${bld}/offsets/%.hex} ${bld}/check_makefile
+	grep '^' ${offset_names:%=${bld}/offsets/%.hex} | sed -e 's/:/: 0x/' | column -t > $@
 
-build/os.offsets.dec: ${offset_names:%=build/offsets/%.dec} build/check_makefile
-	grep '^' ${offset_names:%=build/offsets/%.dec} | sed -e 's/:/: /' | column -t > $@
+${bld}/os.offsets.dec: ${offset_names:%=${bld}/offsets/%.dec} ${bld}/check_makefile
+	grep '^' ${offset_names:%=${bld}/offsets/%.dec} | sed -e 's/:/: /' | column -t > $@
 
-build/offsets/%.hex: build/offsets/%.dec
+${bld}/offsets/%.hex: ${bld}/offsets/%.dec
 	printf '%x\n' $$(cat $<) > $@
 
-build/os.hex_with_offsets: ${os_filename} build/os.offsets.hex
+${bld}/os.hex_with_offsets: ${os_filename} ${bld}/os.offsets.hex
 	hexdump -C $< \
-	 | grep -E -e "($$(cat build/os.offsets.hex | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
+	 | grep -E -e "($$(cat ${bld}/os.offsets.hex | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*0x\(.*\).$$/^\10/' | tr '\n' '|')^)" --color=yes > $@
 
-build/os.ndisasm.disasm: ${os_filename} utils/compact-ndisasm.sh build/check_makefile
+${bld}/os.ndisasm.disasm: ${os_filename} utils/compact-ndisasm.sh ${bld}/check_makefile
 	./utils/compact-ndisasm.sh $< $@
 
-build/os.reasm.asm: build/os.ndisasm.disasm build/check_makefile
+${bld}/os.reasm.asm: ${bld}/os.ndisasm.disasm ${bld}/check_makefile
 	sed -e 's/^[^ ]\+ \+[^ ]\+ \+//' $< > $@
 
-build/test_pass/noemu_%.reasm build/%.reasm: build/%.reasm.asm ${os_filename} utils/compact-ndisasm.sh build/check_makefile
+${bld}/test_pass/noemu_%.reasm ${bld}/%.reasm: ${bld}/%.reasm.asm ${os_filename} utils/compact-ndisasm.sh ${bld}/check_makefile
 # For now ignore this test, since we cannot have a reliable re-assembly of arbitrary data.
-	touch build/test_pass/noemu_$*.reasm build/$*.reasm
+	touch ${bld}/test_pass/noemu_$*.reasm ${bld}/$*.reasm
 #	nasm $< -o $@
 #	@echo "diff $@ ${os_filename}"
 #	@diff $@ ${os_filename} \
 #         && echo "[1;32mRe-assembled file is identical to ${os_filename}[m" \
-#         || (./utils/compact-ndisasm.sh $@ build/os.reasm.disasm; \
-#	     echo "[0;33mRe-assembled file is different from ${os_filename}. Use meld build/os.ndisasm.disasm build/os.reasm.disasm to see differences.[m"; \
+#         || (./utils/compact-ndisasm.sh $@ ${bld}/os.reasm.disasm; \
+#	     echo "[0;33mRe-assembled file is different from ${os_filename}. Use meld ${bld}/os.ndisasm.disasm ${bld}/os.reasm.disasm to see differences.[m"; \
 #	     exit 0)
 
-#os.arm.disasm: ${os_filename} build/check_makefile
+#os.arm.disasm: ${os_filename} ${bld}/check_makefile
 #	arm-none-eabi-objdump --endian=little -marm -b binary -D --adjust-vma=0x8000 $< > $@
 
 .PHONY: clean
-clean: build/check_makefile
+clean: ${bld}/check_makefile
 	rm -f ${built_files} ${temp_files}
 	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
           if test -e "$$d"; then \
@@ -393,67 +412,67 @@ clean: build/check_makefile
           fi; \
         done
 
-.gitignore: build/check_makefile
+.gitignore: ${bld}/check_makefile
 	for f in ${built_files}; do echo "/$$f"; done | sort > $@
 
 .PHONY: test
-test: ${tests_emu:test/%=build/test_pass/emu_%} \
-      ${tests_noemu:test/%=build/test_pass/noemu_%} \
-      ${tests_requiring_sudo:test/%=build/test_pass/sudo_%} \
+test: ${tests_emu:test/%=${bld}/test_pass/emu_%} \
+      ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
+      ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
       all \
-      build/check_makefile
+      ${bld}/check_makefile
 
 .PHONY: ${tests_emu}
-${tests_emu}: build/test_pass/emu_$$(@F)
+${tests_emu}: ${bld}/test_pass/emu_$$(@F)
 
-build/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
+${bld}/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
  ${os_filename} \
- build/checkerboard_800x600.xbm \
+ ${bld}/checkerboard_800x600.xbm \
  utils/gui-wrapper.sh utils/ansi-screenshots/ansi_screenshot.sh utils/ansi-screenshots/to_ansi.sh \
  test/%.sh \
- build/check_makefile \
- | build/test_pass deploy-screenshots
+ ${bld}/check_makefile \
+ | ${bld}/test_pass deploy-screenshots
 	./utils/gui-wrapper.sh 800x600x24 ./test/$*.sh $<
-	touch build/test_pass/emu_$*
+	touch ${bld}/test_pass/emu_$*
 
 .PHONY: test/noemu
 test/noemu: ${tests_noemu:test/%=build/test_pass/noemu_%} build/check_makefile
 
-build/test_pass/noemu_zip: ${os_filename} build/check_makefile
+${bld}/test_pass/noemu_zip: ${os_filename} ${bld}/check_makefile
 	unzip -t ${os_filename}
 	touch $@
 
-build/test_pass/noemu_sizes: build/os.32k ${os_filename} build/check_makefile
-	test "$$(utils/file-length.sh -c build/os.32k)" = "$$((32*1024))"
+${bld}/test_pass/noemu_sizes: ${bld}/os.32k ${os_filename} ${bld}/check_makefile
+	test "$$(utils/file-length.sh -c ${bld}/os.32k)" = "$$((32*1024))"
 	test "$$(utils/file-length.sh -c ${os_filename})" = "$$((1440*1024))"
 	touch $@
 
 # check that the fat filesystem has the correct contents
-build/test_pass/noemu_fat12_contents: ${os_filename} ${dep_bytes_fat12_start} build/check_makefile
+${bld}/test_pass/noemu_fat12_contents: ${os_filename} ${dep_bytes_fat12_start} ${bld}/check_makefile
 	mdir -i "$<@@${bytes_fat12_start}" :: | grep -E "^os[[:space:]]+zip[[:space:]]+"
 	touch $@
 
 .PHONY: test/requiring_sudo
-test/requiring_sudo: ${tests_requiring_sudo:test/%=build/test_pass/sudo_%} build/check_makefile
+test/requiring_sudo: ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} ${bld}/check_makefile
 
 # check that the fat filesystem can be mounted and has the correct contents
-build/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} build/check_makefile | build/mnt_fat12
-	sudo umount build/mnt_fat12 || true
-	sudo mount -o loop,ro,offset=${bytes_fat12_start} $< build/mnt_fat12
-	ls -l build/mnt_fat12 | grep os.zip
-	sudo umount build/mnt_fat12
+${bld}/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} ${bld}/check_makefile | ${bld}/mnt_fat12
+	sudo umount ${bld}/mnt_fat12 || true
+	sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12
+	ls -l ${bld}/mnt_fat12 | grep os.zip
+	sudo umount ${bld}/mnt_fat12
 	touch $@
 
-build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_iso
-	sudo umount build/mnt_iso || true
-	grep '^' build/offsets/* # debug failure to mount the ISO9660 filesystem
-	(sudo mount -o loop,ro $< build/mnt_iso) || true
+${bld}/test_pass/sudo_iso_mount: ${os_filename} ${bld}/check_makefile | ${bld}/mnt_iso
+	sudo umount ${bld}/mnt_iso || true
+	grep '^' ${bld}/offsets/* # debug failure to mount the ISO9660 filesystem
+	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true
 	dmesg | tail # debug failure to mount the ISO9660 filesystem
 	hexdump -C ${os_filename}
-	ls -l build/mnt_iso | grep os.zip
-	sudo umount build/mnt_iso
-	sudo mount -o loop,ro $< build/mnt_iso
-	sudo umount build/mnt_iso
+	ls -l ${bld}/mnt_iso | grep os.zip
+	sudo umount ${bld}/mnt_iso
+	sudo mount -o loop,ro $< ${bld}/mnt_iso
+	sudo umount ${bld}/mnt_iso
 	touch $@
 
 .PHONY: test/macos
@@ -471,8 +490,8 @@ test/macos-sh-x11:
 	screencapture deploy-screenshots/macos-sh-x11-screencapture.png
 
 .PHONY: test/macos-sh
-test/macos-sh: build/check_makefile \
-               build/checkerboard_1024x768.png \
+test/macos-sh: ${bld}/check_makefile \
+               ${bld}/checkerboard_1024x768.png \
                | deploy-screenshots
 	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/${os_filename}"'
 	sleep 2
@@ -485,18 +504,18 @@ test/macos-sh: build/check_makefile \
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
 
 # Create checkerboard background
-build/checkerboard_%.png: build/check_makefile
+${bld}/checkerboard_%.png: ${bld}/check_makefile
 	convert -size "$*" \
 	        tile:pattern:checkerboard \
 	        -auto-level +level-colors 'gray(192),gray(128)' \
 	        $@
 
-build/checkerboard_%.xbm: build/check_makefile
+${bld}/checkerboard_%.xbm: ${bld}/check_makefile
 	convert -size "$*" \
 	        tile:pattern:checkerboard \
 	        -auto-level \
 	        $@
 
 # Temporary files
-build/bochsrc build/bochscontinue build/twm_cfg build/virtualbox.img:
+${bld}/bochsrc ${bld}/bochscontinue ${bld}/twm_cfg ${bld}/virtualbox.img:
 	touch $@
