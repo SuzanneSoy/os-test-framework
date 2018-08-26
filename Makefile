@@ -7,6 +7,9 @@ tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-s
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents
 
+commit_timestamp = "$$(git log -1 --pretty=format:%ad --date=iso8601-strict)"
+commit_faketime  = "$$(git log -1 --pretty=format:%ad --date=format:"%Y-%m-%d %H:%m:%S")"
+
 offset_names = bytes_os_size \
                bytes_mbr_start \
                bytes_mbr_end \
@@ -86,6 +89,14 @@ built_files = ${os_filename} \
               ${tests_emu:test/%=deploy-screenshots/%.png} \
               ${tests_emu:test/%=deploy-screenshots/%-anim.gif}
 
+# Temporary copies used to adjust timestamps for reproducible builds.
+# These are normally created and deleted within a single target, but
+# could remain if make is interrupted during the build.
+temp_files       = build/iso_files.tmp/os.zip \
+                   build/iso_files.tmp/boot/iso_boot.sys
+temp_directories = build/iso_files.tmp \
+                   build/iso_files.tmp/boot/
+
 built_directories = build/iso_files/boot build/iso_files build/offsets build/mnt_fat12 build/mnt_iso build/test_pass deploy-screenshots
 more_built_directories = ${built_directories} build
 
@@ -150,7 +161,9 @@ build/os.32k: example-os/os.asm build/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
 build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/check_makefile
-	mkisofs \
+	cp -a -- build/iso_files build/iso_files.tmp
+	find build/iso_files.tmp -depth -exec touch -d ${commit_timestamp} '{}' ';'
+	faketime -f ${commit_faketime} mkisofs \
 	 --input-charset utf-8 \
 	 -rock \
 	 -joliet \
@@ -160,7 +173,11 @@ build/os.iso: build/iso_files/os.zip build/iso_files/boot/iso_boot.sys build/che
 	 -boot-load-size 4 \
 	 -pad \
 	 -output $@ \
-	 ./build/iso_files/
+	 ./build/iso_files.tmp/
+	rm -- build/iso_files.tmp/os.zip \
+              build/iso_files.tmp/boot/iso_boot.sys
+	rmdir build/iso_files.tmp/boot/
+	rmdir build/iso_files.tmp/
 
 # Layout:
 # MBR; GPT; UNIX sh & MS-DOS batch scripts; ISO9660; FAT12; GPT mirror; ZIP
@@ -224,12 +241,12 @@ ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                 
 os_fat12_partition = "$@@@${bytes_fat12_start}"
 build/os.fat12: build/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} build/check_makefile
 	set -x; dd if=/dev/zero bs=${sector_size} count=${sectors_os_size} of=$@
-	set -x; mformat -v "Example OS" \
+	faketime -f ${commit_faketime} mformat -v "Example OS" \
 	 -T ${sectors_fat12_size} \
 	 -h ${os_floppy_chs_h} \
 	 -s ${os_floppy_chs_s} \
 	 -i ${os_fat12_partition}
-	set -x; mcopy -i ${os_fat12_partition} build/os.zip "::os.zip"
+	faketime -f ${commit_faketime} mcopy -i ${os_fat12_partition} $< "::os.zip"
 
 build/iso_files/os.zip: build/os.zip build/check_makefile
 # TODO: make it so that the various file formats are mutual quines:
@@ -245,13 +262,27 @@ build/iso_files/boot/iso_boot.sys: build/os.32k build/check_makefile
 	dd if=$< bs=512 count=4 of=$@
 
 build/os.zip: build/os.32k build/check_makefile
-	zip $@ $<
+#	We copy os.32k and alter its timestamp to ensure reproducible
+#	builds.
+	mkdir -p build/os.32k.tmp
+	cp -a $< build/os.32k.tmp/os.32k
+	touch -d ${commit_timestamp} build/os.32k.tmp/os.32k
+	(cd build/os.32k.tmp/ && zip -X ../../build/os.zip os.32k)
+	rm build/os.32k.tmp/os.32k
+	rmdir build/os.32k.tmp
 
 build/os.zip.adjusted: build/os.zip ${dep_bytes_zip_start} build/check_makefile
 # TODO: the ZIP file can end with a variable-length comment, this would allow us to hide the GPT mirrors.
 	set -x; dd if=/dev/zero bs=1 count=${bytes_zip_start} of=$@
 	cat $< >> $@
 	zip --adjust-sfx $@
+
+gdisk_pipe_commands_slowly=while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done
+
+commit_hash_as_guid=$(git log -1 --pretty=format:%H | sed -e 's/^\(.\{8\}\)\(.\{4\}\)\(.\{4\}\)\(.\{4\}\)\(.\{12\}\).*$$/\1-\2-\3-\4-\5/' | tr '[:lower:]' '[:upper:]')
+git_dirty=test -n "$$(git diff --shortstat)"
+gpt_disk_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '0'; else printf '2'; fi)
+gpt_partition_guid=${commit_hash_as_guid}$$(if $git_dirty; then printf '1'; else printf '3'; fi)
 
 ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
                 ${dep_bytes_header_32k_start} \
@@ -281,13 +312,21 @@ ${os_filename}: build/os.32k build/os.iso build/os.fat12 build/os.zip.adjusted \
 #         * Recovery and transformation options, make Hybrid,
 #           * add GPT partition #1 to the hybrid MBR, do Not put the EFI partition first,
 #           * MBR partition type=0x01, bootable=Yes, do Not add extra partitions,
-#         * Print GPT, print MBR, Write, Proceed.
+#           * back to Main menu,
+#         * eXpert mode,
+#           * Change partition GUID, the GUID itself,
+#           * change disk GUID, the GUID itself,
+#           * Print GPT, print prOtective MBR, Write, Proceed.
 	(if test "$$(uname -o)" = "Cygwin"; then printf "Y\n"; fi; \
-	 printf "d\nx\nl\n1\nm\nn\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\n0700\n"; \
+	 printf "d\nx\nl\n1\nm\n"; \
+	 printf "n\n1\n${sectors_fat12_start}\n${sectors_fat12_size}\n0700\n"; \
 	 printf "r\nh\n"; \
 	 printf "1\nN\n"; \
 	 printf "01\nY\nN\n"; \
-	 printf "p\no\nw\nY\n") | while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done | gdisk $@
+	 printf "x\n"; \
+	 printf "g\n${gpt_disk_guid}\n"; \
+	 printf "c\n${gpt_partition_guid}\n"; \
+	 printf "p\no\nw\nY\n") | ${gdisk_pipe_commands_slowly} | gdisk $@
 # Inject MS-DOS newlines (CR+LF) and comments (":: ") in the GUID field of unused partition table entries,
 # so that the part that is to be skipped by MS-DOS does not form a line longer than the MS-DOS maximum
 # line length (8192 excluding CR+LF). $i below is the partition entry number, starting from 1
@@ -305,11 +344,12 @@ build/os.file: ${os_filename} build/check_makefile
 
 build/os.gdisk: ${os_filename} build/check_makefile
 #       gdisk commands:
-#         * Print partition table
-#         * Recovery and transformation options
-#         * print prOtective MBR table
-#         * Quit
-	printf 'p\nr\no\nq\n' | gdisk $< | tee $@
+#         * eXpert mode
+#           * Print partition table
+#           * print detailed Information about the (only) partition
+#           * print prOtective MBR table
+#           * Quit
+	printf '2\nx\np\ni\nr\no\nq\n' | ${gdisk_pipe_commands_slowly} | gdisk $< | tee $@
 
 build/os.offsets.hex: ${offset_names:%=build/offsets/%.hex} build/check_makefile
 	grep '^' ${offset_names:%=build/offsets/%.hex} | sed -e 's/:/: 0x/' | column -t > $@
@@ -346,8 +386,8 @@ build/test_pass/noemu_%.reasm build/%.reasm: build/%.reasm.asm ${os_filename} ut
 
 .PHONY: clean
 clean: build/check_makefile
-	rm -f ${built_files}
-	for d in $$(echo ${more_built_directories} | tr ' ' '\n' | sort --reverse); do \
+	rm -f ${built_files} ${temp_files}
+	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
           if test -e "$$d"; then \
             rmdir "$$d"; \
           fi; \
@@ -409,7 +449,7 @@ build/test_pass/sudo_iso_mount: ${os_filename} build/check_makefile | build/mnt_
 	grep '^' build/offsets/* # debug failure to mount the ISO9660 filesystem
 	(sudo mount -o loop,ro $< build/mnt_iso) || true
 	dmesg | tail # debug failure to mount the ISO9660 filesystem
-	hexdump -C os.bat
+	hexdump -C ${os_filename}
 	ls -l build/mnt_iso | grep os.zip
 	sudo umount build/mnt_iso
 	sudo mount -o loop,ro $< build/mnt_iso
@@ -425,7 +465,7 @@ test/macos-sh-x11:
 	sudo chmod a+rwxt /tmp/.X11-unix
 	xvfb :42 & \
 	sleep 5; \
-	DISPLAY=:42 xterm -e ./os.bat & \
+	DISPLAY=:42 xterm -e ./${os_filename} & \
 	sleep 5; \
 #	DISPLAY=:42 import -window root deploy-screenshots/macos-sh-x11.png
 	screencapture deploy-screenshots/macos-sh-x11-screencapture.png
@@ -434,7 +474,7 @@ test/macos-sh-x11:
 test/macos-sh: build/check_makefile \
                build/checkerboard_1024x768.png \
                | deploy-screenshots
-	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/os.bat"'
+	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/${os_filename}"'
 	sleep 2
 	osascript -e 'tell app "Terminal" to activate'
 	sleep 5
