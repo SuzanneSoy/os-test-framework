@@ -2,6 +2,7 @@
 # Makefile configuration variables #
 OS_FILENAME               = os.bat
 BUILD_DIR                 = build
+SCREENSHOTS_DIR           = deploy-screenshots
 COMMIT_TIMESTAMP_ISO_8601 = $$(git log -1 --pretty=format:%ad --date=iso8601-strict)
 ####################################
 
@@ -11,6 +12,7 @@ SHELL = bash -euET -o pipefail -c
 
 os_filename  = ${OS_FILENAME}
 bld          = ${BUILD_DIR}
+screenshots  = ${SCREENSHOTS_DIR}
 tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents test/reproducible_build
@@ -53,7 +55,7 @@ more_offset_names = ${offset_names} \
 more_offset_dec = ${more_offset_names:%=${bld}/offsets/%.dec}
 more_offset_hex = ${more_offset_names:%=${bld}/offsets/%.hex}
 
-reproducible_os_filename="${bld}/reproducible_$$(basename "${os_filename}")"
+reproducible_os_filename="${bld}/reproduced_$$(basename "${os_filename}")"
 
 # + os.arm.disasm
 # + os.reasm.disasm
@@ -96,8 +98,8 @@ built_files = ${os_filename} \
               ${tests_emu:test/%=${bld}/test_pass/emu_%} \
               ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
               ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
-              ${tests_emu:test/%=deploy-screenshots/%.png} \
-              ${tests_emu:test/%=deploy-screenshots/%-anim.gif}
+              ${tests_emu:test/%=${screenshots}/%.png} \
+              ${tests_emu:test/%=${screenshots}/%-anim.gif}
 
 # Temporary copies used to adjust timestamps for reproducible builds.
 # These are normally created and deleted within a single target, but
@@ -113,7 +115,7 @@ built_directories = ${bld}/iso_files/boot \
                     ${bld}/mnt_fat12 \
                     ${bld}/mnt_iso \
                     ${bld}/test_pass \
-                    deploy-screenshots
+                    ${screenshots}
 more_built_directories = ${built_directories} ${bld}
 
 os_image_size_kb = 1440
@@ -142,7 +144,14 @@ ${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
 ${bld}/makefile_w_arnings: Makefile
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -n --warn-undefined-variables OS_FILENAME=${OS_FILENAME} BUILD_DIR=${BUILD_DIR} test 2>$@ 1>/dev/null || make -n --warn-undefined-variables test
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	   make -n --warn-undefined-variables \
+	        OS_FILENAME=${OS_FILENAME} \
+	        BUILD_DIR=${BUILD_DIR} \
+	        SCREENSHOTS_DIR=${SCREENSHOTS_DIR} \
+	        COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	        test 2>$@ 1>/dev/null \
+	 || cat $@
 
 # Check that the file ${bld}/makefile_w_arnings is present, and that it does not contain the string "warn".
 ${bld}/check_makefile_w_arnings: ${bld}/makefile_w_arnings
@@ -156,7 +165,13 @@ ${bld}/check_makefile: ${bld}/check_makefile_w_arnings ${bld}/check_makefile_tar
 	@touch $@
 
 ${bld}/makefile_database: Makefile ${bld}/check_makefile_w_arnings
-	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; make -rpn OS_FILENAME=${OS_FILENAME} BUILD_DIR=${BUILD_DIR} | sed -n -e '/^# Make data base,/,$$p' > $@
+	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
+	   make -rpn \
+	        OS_FILENAME=${OS_FILENAME} \
+	        BUILD_DIR=${BUILD_DIR} \
+	        SCREENSHOTS_DIR=${SCREENSHOTS_DIR} \
+	        COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	 | sed -n -e '/^# Make data base,/,$$p' > $@
 
 ${bld}/makefile_database_files: ${bld}/makefile_database ${bld}/check_makefile_w_arnings
 	@sed -n -e '/^# Files$$/,/^# files hash-table stats:$$/p' $< > $@
@@ -414,10 +429,14 @@ ${bld}/test_pass/noemu_%.reasm ${bld}/%.reasm: ${bld}/%.reasm.asm ${os_filename}
 
 .PHONY: clean
 clean: ${bld}/check_makefile
-	rm -f ${built_files} ${temp_files} ${bld}/reproducible_${os_filename}
+	rm -f ${built_files} ${temp_files} ${bld}/${reproducible_os_filename}
 	if test -d ${bld}/reproducible; then \
 	  unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
-	    make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean; \
+	    make OS_FILENAME=${reproducible_os_filename} \
+	         BUILD_DIR=${bld}/reproducible \
+	         SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
+	         COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	         clean; \
 	fi
 	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
           if test -e "$$d"; then \
@@ -445,13 +464,13 @@ ${tests_emu}:            ${bld}/test_pass/emu_$$(@F)   ${bld}/check_makefile
 ${tests_noemu}:          ${bld}/test_pass/noemu_$$(@F) ${bld}/check_makefile
 ${tests_requiring_sudo}: ${bld}/test_pass/sudo_$$(@F)  ${bld}/check_makefile
 
-${bld}/test_pass/emu_% deploy-screenshots/%.png deploy-screenshots/%-anim.gif: \
+${bld}/test_pass/emu_% ${screenshots}/%.png ${screenshots}/%-anim.gif: \
  ${os_filename} \
  ${bld}/checkerboard_800x600.xbm \
  utils/gui-wrapper.sh utils/ansi-screenshots/ansi_screenshot.sh utils/ansi-screenshots/to_ansi.sh \
  test/%.sh \
  ${bld}/check_makefile \
- | ${bld}/test_pass deploy-screenshots
+ | ${bld}/test_pass ${screenshots}
 	./utils/gui-wrapper.sh 800x600x24 ./test/$*.sh $<
 	touch ${bld}/test_pass/emu_$*
 
@@ -503,19 +522,19 @@ test/macos-sh-x11:
 	sleep 5; \
 	DISPLAY=:42 xterm -e ./${os_filename} & \
 	sleep 5; \
-#	DISPLAY=:42 import -window root deploy-screenshots/macos-sh-x11.png
-	screencapture deploy-screenshots/macos-sh-x11-screencapture.png
+#	DISPLAY=:42 import -window root ${screenshots}/macos-sh-x11.png
+	screencapture ${screenshots}/macos-sh-x11-screencapture.png
 
 .PHONY: test/macos-sh
 test/macos-sh: ${bld}/check_makefile \
                ${bld}/checkerboard_1024x768.png \
-               | deploy-screenshots
+               | ${screenshots}
 	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/${os_filename}"'
 	sleep 2
 	osascript -e 'tell app "Terminal" to activate'
 	sleep 5
 	(date +%n && sleep 0.2 && date +%n) || true
-	screencapture deploy-screenshots/screencapture-os-bat.png
+	screencapture ${screenshots}/screencapture-os-bat.png
 	./utils/gui-wrapper-mac.sh 1024x768x24 ./test/gui-sh-mac.sh ${os_filename}
 
 # See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
@@ -544,15 +563,27 @@ ${bld}/test_pass/noemu_reproducible_build: ${os_filename} ${bld}/os.hex_with_off
 #       TODO: try to see if we can re-enable some of these variables without
 #             causing problems on macos.
 	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
-	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean
+	  make OS_FILENAME=${reproducible_os_filename} \
+	       BUILD_DIR=${bld}/reproducible \
+	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
+	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       clean
 	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
-	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible ${reproducible_os_filename} \
-                                                                                     ${bld}/reproducible/os.hex_with_offsets
+	  make OS_FILENAME=${reproducible_os_filename} \
+	       BUILD_DIR=${bld}/reproducible \
+	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
+	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       ${reproducible_os_filename} \
+               ${bld}/reproducible/os.hex_with_offsets
 #       Check that the second build produced the same file.
 	if ! diff ${os_filename} ${reproducible_os_filename}; then \
 	  diff ${bld}/os.hex_with_offsets ${bld}/reproducible/os.hex_with_offsets || true; \
 	  exit 1; \
 	fi
 	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
-	  make OS_FILENAME=${reproducible_os_filename} BUILD_DIR=${bld}/reproducible clean
+	  make OS_FILENAME=${reproducible_os_filename} \
+	       BUILD_DIR=${bld}/reproducible \
+	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
+	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       clean
 	touch $@
