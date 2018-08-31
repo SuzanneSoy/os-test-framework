@@ -211,9 +211,10 @@ ${more_built_directories}: Makefile
 ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
+cp_T_option = $$(if test "$$(uname -s)" = Darwin; then echo ''; else echo '-T'; fi)
 ${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ${bld}/check_makefile
 	! test -d ${bld}/iso_files.tmp
-	cp -a -T -- ${bld}/iso_files ${bld}/iso_files.tmp
+	cp -a ${cp_T_option} -- ${bld}/iso_files ${bld}/iso_files.tmp
 	find ${bld}/iso_files.tmp -depth -exec touch -t ${commit_timestamp} '{}' ';'
 	(cd ./${bld}/iso_files.tmp/ && faketime -f ${commit_faketime} mkisofs \
 	 --input-charset utf-8 \
