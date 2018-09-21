@@ -108,7 +108,8 @@ built_files = ${os_filename} \
               ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
               ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
               ${tests_emu:test/%=${screenshots}/%.png} \
-              ${tests_emu:test/%=${screenshots}/%-anim.gif}
+              ${tests_emu:test/%=${screenshots}/%-anim.gif} \
+              utils/mformat utils/mcopy utils/mkisofs
 
 # Temporary copies used to adjust timestamps for reproducible builds.
 # These are normally created and deleted within a single target, but
@@ -211,12 +212,17 @@ ${more_built_directories}: Makefile
 ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
+# Circumvent the fact that faketime does not work on system binaries in macos
+./utils/mkisofs ./utils/mformat ./utils/mcopy: Makefile	# TODO: depend on the mkisofs binary
+	cp $$(which $$(basename $@)) $@
+	chmod u+x $@
+
 cp_T_option = $$(if test "$$(uname -s)" = Darwin; then echo ''; else echo '-T'; fi)
-${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ${bld}/check_makefile
+${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ./utils/mkisofs ${bld}/check_makefile
 	! test -d ${bld}/iso_files.tmp
 	cp -a ${cp_T_option} -- ${bld}/iso_files ${bld}/iso_files.tmp
 	find ${bld}/iso_files.tmp -depth -exec touch -t ${commit_timestamp} '{}' ';'
-	(cd ./${bld}/iso_files.tmp/ && faketime -f ${commit_faketime} mkisofs \
+	UTILS="$$PWD/utils" (cd ./${bld}/iso_files.tmp/ && faketime -f ${commit_faketime} $$UTILS/mkisofs \
 	 --input-charset utf-8 \
 	 -rock \
 	 -joliet \
@@ -292,14 +298,15 @@ ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes
 ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},,                                         }}
 
 os_fat12_partition = "$@@@${bytes_fat12_start}"
-${bld}/os.fat12: ${bld}/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} ${bld}/check_makefile
+${bld}/os.fat12: ${bld}/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} \
+                 ./utils/mformat ./utils/mcopy ${bld}/check_makefile
 	set -x; dd if=/dev/zero bs=${sector_size} count=${sectors_os_size} of=$@
-	faketime -f ${commit_faketime} mformat -v "Example OS" \
+	faketime -f ${commit_faketime} ./utils/mformat -v "Example OS" \
 	 -T ${sectors_fat12_size} \
 	 -h ${os_floppy_chs_h} \
 	 -s ${os_floppy_chs_s} \
 	 -i ${os_fat12_partition}
-	faketime -f ${commit_faketime} mcopy -i ${os_fat12_partition} $< "::os.zip"
+	faketime -f ${commit_faketime} ./utils/mcopy -i ${os_fat12_partition} $< "::os.zip"
 
 ${bld}/iso_files/os.zip: ${bld}/os.zip ${bld}/check_makefile
 # TODO: make it so that the various file formats are mutual quines:
