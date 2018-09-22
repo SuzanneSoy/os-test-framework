@@ -118,3 +118,6 @@
 /deploy-screenshots/virtualbox-anim.gif
 /deploy-screenshots/virtualbox.png
 /os.bat
+/utils/mcopy
+/utils/mformat
+/utils/mkisofs
