@@ -57,7 +57,7 @@ install:
   - cmd: echo TODO install gnu make and dependencies
 
 build_script:
-  - cmd: make all
+  - cmd: make COMMIT_TIMESTAMP_ISO_8601="%APPVEYOR_REPO_COMMIT_TIMESTAMP%" all
 
 test_script:
   - cmd: cmd /C os.bat exit
