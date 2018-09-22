@@ -1,7 +1,5 @@
 max_jobs: 1
-# Are both necessary?
 shallow_clone: true
-clone_depth: 1
 
 image: Visual Studio 2015
 
@@ -24,7 +22,7 @@ install:
   - cmd: cd ..
   - cmd: set PATH=%cd%\gdisk\;%PATH%
   # mkisofs,zip,ImageMagick
-  - cmd: C:\cygwin\setup-x86.exe --no-replaceonreboot --no-shortcuts --quiet-mode --root c:\cygwin --packages mkisofs,genisoimage,zip,ImageMagick,xorg-server-extra
+  - cmd: C:\cygwin\setup-x86.exe --no-replaceonreboot --no-shortcuts --quiet-mode --root c:\cygwin --packages mkisofs,genisoimage,zip,ImageMagick,xorg-server-extra,datefudge
   - cmd: C:\cygwin\bin\find C:\cygwin -iname "import*"
   - cmd: C:\cygwin\bin\find C:\cygwin -iname "convert*"
   # mtools
