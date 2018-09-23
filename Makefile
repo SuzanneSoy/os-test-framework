@@ -595,7 +595,17 @@ ${bld}/test_pass/noemu_reproducible_build: ${os_filename} ${bld}/os.hex_with_off
 #       Check that the second build produced the same file.
 	if ! diff ${os_filename} ${reproducible_os_filename}; then \
 	  diff ${bld}/os.hex_with_offsets ${bld}/reproducible/os.hex_with_offsets || true; \
-	  exit 1; \
+	  if test "$$(uname -s)" = Darwin -o "$$(uname -o)" = "Cygwin"; then \
+	    for i in `seq 5`; do \
+	      printf '\033[1;31m########################################################\033[m'; \
+	    done; \
+	    echo "REPRODUCIBLE BUILDS ARE UNSUPPORTED ON MACOS AND WINDOWS"; \
+	    for i in `seq 5`; do \
+	      printf '\033[1;31m########################################################\033[m'; \
+	    done; \
+	  else \
+	    exit 1; \
+	  fi; \
 	fi
 	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
 	  make OS_FILENAME=${reproducible_os_filename} \
