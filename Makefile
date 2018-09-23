@@ -17,8 +17,17 @@ tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-s
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents test/reproducible_build
 
-commit_timestamp = "$$(date -d "${COMMIT_TIMESTAMP_ISO_8601}" '+%Y%m%d%H%m.%S')"
-commit_faketime  = "$$(date -d "${COMMIT_TIMESTAMP_ISO_8601}" '+%Y-%m-%d %H:%m:%S')"
+# We truncate the timezone, because the Darwin version of date seems to lack
+# the %:z format (for ±HH:MM timezone).
+define date_command
+  if test "$$(uname -s)" = Darwin; then \
+    date -j -f %Y-%m-%dT%H:%M:%S $$(echo ${1} | cut -c 1-19) ${2}; \
+  else \
+    date -d ${1} ${2}; \
+  fi
+endef
+commit_timestamp = "$$(${call date_command,"${COMMIT_TIMESTAMP_ISO_8601}",'+%Y%m%d%H%m.%S'})"
+commit_faketime  = "$$(${call date_command,"${COMMIT_TIMESTAMP_ISO_8601}",'+%Y-%m-%d %H:%m:%S'})"
 
 offset_names = bytes_os_size \
                bytes_mbr_start \
