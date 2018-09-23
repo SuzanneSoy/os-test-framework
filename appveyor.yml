@@ -1,7 +1,5 @@
 max_jobs: 1
-# Are both necessary?
 shallow_clone: true
-clone_depth: 1
 
 image: Visual Studio 2015
 
