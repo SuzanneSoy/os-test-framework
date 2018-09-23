@@ -1,17 +1,22 @@
+####################################
+# Makefile configuration variables #
+OS_FILENAME               = os.bat
+BUILD_DIR                 = build
+COMMIT_TIMESTAMP_ISO_8601 = $$(git log -1 --pretty=format:%ad --date=iso8601-strict)
+####################################
+
 MAKEFLAGS = --warn-undefined-variables
 SHELL = bash -euET -o pipefail -c
 .SECONDEXPANSION:
 
-OS_FILENAME  = os.bat
 os_filename  = ${OS_FILENAME}
-BUILD_DIR    = build
 bld          = ${BUILD_DIR}
 tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-system-arm test/virtualbox test/bochs test/gui-sh test/dosbox
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents test/reproducible_build
 
-commit_timestamp = "$$(git log -1 --pretty=format:%ad --date=format:"%Y%m%d%H%m.%S")"
-commit_faketime  = "$$(git log -1 --pretty=format:%ad --date=format:"%Y-%m-%d %H:%m:%S")"
+commit_timestamp = "$$(date -d "${COMMIT_TIMESTAMP_ISO_8601}" '+%Y%m%d%H%m.%S')"
+commit_faketime  = "$$(date -d "${COMMIT_TIMESTAMP_ISO_8601}" '+%Y-%m-%d %H:%m:%S')"
 
 offset_names = bytes_os_size \
                bytes_mbr_start \
