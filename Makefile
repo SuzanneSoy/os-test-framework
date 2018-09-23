@@ -380,10 +380,10 @@ ${bld}/os.gdisk: ${os_filename} ${bld}/check_makefile
 	printf '2\nx\np\ni\nr\no\nq\n' | ${gdisk_pipe_commands_slowly} | gdisk $< | tee $@
 
 ${bld}/os.offsets.hex: ${offset_names:%=${bld}/offsets/%.hex} ${bld}/check_makefile
-	grep '^' ${offset_names:%=${bld}/offsets/%.hex} | sed -e 's/:/: 0x/' | column -t > $@
+	grep '^' ${offset_names:%=${bld}/offsets/%.hex} | sed -e 's|^.*/||' -e 's/:/: 0x/' | column -t > $@
 
 ${bld}/os.offsets.dec: ${offset_names:%=${bld}/offsets/%.dec} ${bld}/check_makefile
-	grep '^' ${offset_names:%=${bld}/offsets/%.dec} | sed -e 's/:/: /' | column -t > $@
+	grep '^' ${offset_names:%=${bld}/offsets/%.dec} | sed -e 's|^.*/||' -e 's/:/: /' | column -t > $@
 
 ${bld}/offsets/%.hex: ${bld}/offsets/%.dec
 	printf '%x\n' $$(cat $<) > $@
