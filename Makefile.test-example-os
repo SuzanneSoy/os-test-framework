@@ -1,0 +1,159 @@
+built_files += ${bld}/checkerboard_800x600.xbm \
+               ${bld}/checkerboard_1024x768.png \
+               ${bld}/bochsrc \
+               ${bld}/bochscontinue \
+               ${bld}/twm_cfg \
+               ${bld}/virtualbox.img \
+               ${tests_emu:test/%=${bld}/test_pass/emu_%} \
+               ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
+               ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
+               ${tests_emu:test/%=${screenshots}/%.png} \
+               ${tests_emu:test/%=${screenshots}/%-anim.gif} \
+               utils/mformat utils/mcopy utils/mkisofs
+
+built_directories += ${bld}/mnt_fat12 \
+                     ${bld}/mnt_iso \
+                     ${bld}/test_pass \
+                     ${screenshots}
+
+${bld}/test_pass/noemu_%.reasm ${bld}/%.reasm: ${bld}/%.reasm.asm ${os_filename} utils/compact-ndisasm.sh ${bld}/check_makefile
+# For now ignore this test, since we cannot have a reliable re-assembly of arbitrary data.
+	touch ${bld}/test_pass/noemu_$*.reasm ${bld}/$*.reasm
+#	nasm $< -o $@
+#	@echo "diff $@ ${os_filename}"
+#	@diff $@ ${os_filename} \
+#         && echo "[1;32mRe-assembled file is identical to ${os_filename}[m" \
+#         || (./utils/compact-ndisasm.sh $@ ${bld}/os.reasm.disasm; \
+#	     echo "[0;33mRe-assembled file is different from ${os_filename}. Use meld ${bld}/os.ndisasm.disasm ${bld}/os.reasm.disasm to see differences.[m"; \
+#	     exit 0)
+
+#os.arm.disasm: ${os_filename} ${bld}/check_makefile
+#	arm-none-eabi-objdump --endian=little -marm -b binary -D --adjust-vma=0x8000 $< > $@
+
+.PHONY: test
+test: ${tests_emu:test/%=${bld}/test_pass/emu_%} \
+      ${tests_noemu:test/%=${bld}/test_pass/noemu_%} \
+      ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} \
+      ${bld}/check_makefile
+
+.PHONY: test/emu test/noemu test/requiring_sudo
+test/emu:            ${tests_emu}            ${bld}/check_makefile
+test/requiring_sudo: ${tests_requiring_sudo} ${bld}/check_makefile
+test/noemu:          ${tests_noemu}          ${bld}/check_makefile
+
+.PHONY: ${tests_emu} ${tests_noemu} ${tests_requiring_sudo}
+${tests_emu}:            ${bld}/test_pass/emu_$$(@F)   ${bld}/check_makefile
+${tests_noemu}:          ${bld}/test_pass/noemu_$$(@F) ${bld}/check_makefile
+${tests_requiring_sudo}: ${bld}/test_pass/sudo_$$(@F)  ${bld}/check_makefile
+
+${bld}/test_pass/emu_% ${screenshots}/%.png ${screenshots}/%-anim.gif: \
+ ${os_filename} \
+ ${bld}/checkerboard_800x600.xbm \
+ utils/gui-wrapper.sh utils/ansi-screenshots/ansi_screenshot.sh utils/ansi-screenshots/to_ansi.sh \
+ test/%.sh \
+ ${bld}/check_makefile \
+ | ${bld}/test_pass ${screenshots}
+	./utils/gui-wrapper.sh 800x600x24 ./test/$*.sh $<
+	touch ${bld}/test_pass/emu_$*
+
+${bld}/test_pass/noemu_zip: ${os_filename} ${bld}/check_makefile
+	unzip -t ${os_filename}
+	touch $@
+
+${bld}/test_pass/noemu_sizes: ${bld}/os.32k ${os_filename} ${bld}/check_makefile
+	test "$$(utils/file-length.sh -c ${bld}/os.32k)" = "$$((32*1024))"
+	test "$$(utils/file-length.sh -c ${os_filename})" = "$$((1440*1024))"
+	touch $@
+
+# check that the fat filesystem has the correct contents
+${bld}/test_pass/noemu_fat12_contents: ${os_filename} ${dep_bytes_fat12_start} ${bld}/check_makefile
+	mdir -i "$<@@${bytes_fat12_start}" :: | grep -E "^os[[:space:]]+zip[[:space:]]+"
+	touch $@
+
+.PHONY: test/requiring_sudo
+test/requiring_sudo: ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} ${bld}/check_makefile
+
+# check that the fat filesystem can be mounted and has the correct contents
+${bld}/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} ${bld}/check_makefile | ${bld}/mnt_fat12
+	sudo umount ${bld}/mnt_fat12 || true
+	# debug failure to mount the FAT12 filesystem
+	(set -x                                           ;\
+	grep '^' ${bld}/offsets/*                                                       ;\
+	(sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12) || true ;\
+	dmesg | tail                                                                    ;\
+	ls -l ${bld}/mnt_fat12 | (grep os.zip || true)                                  ;\
+	sudo umount ${bld}/mnt_fat12 || true                                            ;\
+	sleep 10                                                                        ;\
+	cat ${os_filename} | xz | base64                                                ;\
+	(sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12) || true ;\
+	sudo umount ${bld}/mnt_fat12 || true                                            ;\
+	) > debug-fat12.log 2>&1
+	cat debug-fat12.log
+	sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12
+	ls -l ${bld}/mnt_fat12 | grep os.zip
+	sudo umount ${bld}/mnt_fat12
+	touch $@
+
+${bld}/test_pass/sudo_iso_mount: ${os_filename} ${bld}/check_makefile | ${bld}/mnt_iso
+	sudo umount ${bld}/mnt_iso || true
+	# debug failure to mount the ISO9660 filesystem
+	(set -x                                           ;\
+	grep '^' ${bld}/offsets/*                         ;\
+	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true ;\
+	dmesg | tail                                      ;\
+	cat ${os_filename} | xz | base64                  ;\
+	ls -l ${bld}/mnt_iso | grep os.zip                ;\
+	sudo umount ${bld}/mnt_iso || true                ;\
+	sleep 11                                          ;\
+	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true ;\
+	sudo umount ${bld}/mnt_iso || true                ;\
+	) > debug-iso.log 2>&1
+	cat debug-iso.log
+	sudo mount -o loop,ro $< ${bld}/mnt_iso
+	sudo umount ${bld}/mnt_iso
+	touch $@
+
+.PHONY: test/macos
+test/macos: all test/noemu test/macos-sh test/macos-sh-x11
+
+.PHONY: test/macos-sh-x11
+test/macos-sh-x11:
+	sudo mkdir -p /tmp/.X11-unix
+	sudo chmod a+rwxt /tmp/.X11-unix
+	xvfb :42 & \
+	sleep 5; \
+	DISPLAY=:42 xterm -e ./${os_filename} & \
+	sleep 5; \
+#	DISPLAY=:42 import -window root ${screenshots}/macos-sh-x11.png
+	screencapture ${screenshots}/macos-sh-x11-screencapture.png
+
+.PHONY: test/macos-sh
+test/macos-sh: ${bld}/check_makefile \
+               ${bld}/checkerboard_1024x768.png \
+               | ${screenshots}
+	osascript -e 'tell app "Terminal" to do script "'"$$PWD"'/${os_filename}"'
+	sleep 2
+	osascript -e 'tell app "Terminal" to activate'
+	sleep 5
+	(date +%n && sleep 0.2 && date +%n) || true
+	screencapture ${screenshots}/screencapture-os-bat.png
+	./utils/gui-wrapper-mac.sh 1024x768x24 ./test/gui-sh-mac.sh ${os_filename}
+
+# See https://wiki.osdev.org/EFI#Emulation to emulate an UEFI system with qemu, to test the EFI boot from hdd / cd / fd (?).
+
+# Create checkerboard background
+${bld}/checkerboard_%.png: ${bld}/check_makefile
+	convert -size "$*" \
+	        tile:pattern:checkerboard \
+	        -auto-level +level-colors 'gray(192),gray(128)' \
+	        $@
+
+${bld}/checkerboard_%.xbm: ${bld}/check_makefile
+	convert -size "$*" \
+	        tile:pattern:checkerboard \
+	        -auto-level \
+	        $@
+
+# Temporary files
+${bld}/bochsrc ${bld}/bochscontinue ${bld}/twm_cfg ${bld}/virtualbox.img: ${bld}/check_makefile
+	touch $@
