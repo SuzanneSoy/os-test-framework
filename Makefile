@@ -213,7 +213,7 @@ ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
 # Circumvent the fact that faketime does not work on system binaries in macos
-./utils/mkisofs ./utils/mformat ./utils/mcopy: Makefile	# TODO: depend on the mkisofs binary
+./utils/mkisofs ./utils/mformat ./utils/mcopy: ${bld}/check_makefile # TODO: depend on the mkisofs binary
 	cp $$(which $$(basename $@)) $@
 	chmod u+x $@
 
