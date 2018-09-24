@@ -3,6 +3,7 @@ set -e
 
 if test $# -ne 1 || test "$1" = '-h' -o "$1" = '--help'; then
     echo "Usage: $0 operating_system_file"
+    exit 1
 fi
 os_filename="$1"
 
