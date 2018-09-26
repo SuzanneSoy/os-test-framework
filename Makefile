@@ -213,7 +213,7 @@ ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
 	nasm -w+macro-params -w+macro-selfref -w+orphan-labels -w+gnu-elf-extensions -o $@ $<
 
 # Circumvent the fact that faketime does not work on system binaries in macos
-./utils/mkisofs ./utils/mformat ./utils/mcopy: Makefile	# TODO: depend on the mkisofs binary
+./utils/mkisofs ./utils/mformat ./utils/mcopy: ${bld}/check_makefile # TODO: depend on the mkisofs binary
 	cp $$(which $$(basename $@)) $@
 	chmod u+x $@
 
@@ -511,6 +511,19 @@ test/requiring_sudo: ${tests_requiring_sudo:test/%=${bld}/test_pass/sudo_%} ${bl
 # check that the fat filesystem can be mounted and has the correct contents
 ${bld}/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} ${bld}/check_makefile | ${bld}/mnt_fat12
 	sudo umount ${bld}/mnt_fat12 || true
+	# debug failure to mount the FAT12 filesystem
+	(set -x                                           ;\
+	grep '^' ${bld}/offsets/*                                                       ;\
+	(sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12) || true ;\
+	dmesg | tail                                                                    ;\
+	ls -l ${bld}/mnt_fat12 | (grep os.zip || true)                                  ;\
+	sudo umount ${bld}/mnt_fat12 || true                                            ;\
+	sleep 10                                                                        ;\
+	cat ${os_filename} | xz | base64                                                ;\
+	(sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12) || true ;\
+	sudo umount ${bld}/mnt_fat12 || true                                            ;\
+	) > debug-fat12.log 2>&1
+	cat debug-fat12.log
 	sudo mount -o loop,ro,offset=${bytes_fat12_start} $< ${bld}/mnt_fat12
 	ls -l ${bld}/mnt_fat12 | grep os.zip
 	sudo umount ${bld}/mnt_fat12
@@ -518,12 +531,19 @@ ${bld}/test_pass/sudo_fat12_mount: ${os_filename} ${dep_bytes_fat12_start} ${bld
 
 ${bld}/test_pass/sudo_iso_mount: ${os_filename} ${bld}/check_makefile | ${bld}/mnt_iso
 	sudo umount ${bld}/mnt_iso || true
-	grep '^' ${bld}/offsets/* # debug failure to mount the ISO9660 filesystem
-	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true
-	dmesg | tail # debug failure to mount the ISO9660 filesystem
-	hexdump -C ${os_filename}
-	ls -l ${bld}/mnt_iso | grep os.zip
-	sudo umount ${bld}/mnt_iso
+	# debug failure to mount the ISO9660 filesystem
+	(set -x                                           ;\
+	grep '^' ${bld}/offsets/*                         ;\
+	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true ;\
+	dmesg | tail                                      ;\
+	cat ${os_filename} | xz | base64                  ;\
+	ls -l ${bld}/mnt_iso | grep os.zip                ;\
+	sudo umount ${bld}/mnt_iso || true                ;\
+	sleep 11                                          ;\
+	(sudo mount -o loop,ro $< ${bld}/mnt_iso) || true ;\
+	sudo umount ${bld}/mnt_iso || true                ;\
+	) > debug-iso.log 2>&1
+	cat debug-iso.log
 	sudo mount -o loop,ro $< ${bld}/mnt_iso
 	sudo umount ${bld}/mnt_iso
 	touch $@
