@@ -111,13 +111,23 @@ ${bld}/makefile_file_targets: ${bld}/makefile_non_file_targets ${bld}/makefile_t
 	@comm -23 ${bld}/makefile_targets ${bld}/makefile_non_file_targets > $@
 
 ${built_directories}: ${bld}/check_makefile
-${more_built_directories}: Makefile Makefile.example-os Makefile.test-example-os
+${more_built_directories}: ${Makefiles}
 	mkdir -p $@ && touch $@
 
 .PHONY: clean
-clean: ${bld}/check_makefile
-	rm -f ${built_files} ${temp_files} ${bld}/${reproducible_os_filename}
-	if test -d ${bld}/reproducible; then \
+clean: clean_reproducible ${bld}/check_makefile
+	rm -f ${built_files} ${temp_files}
+	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
+          if test -e "$$d"; then \
+            rmdir "$$d"; \
+          fi; \
+        done
+
+.PHONY: clean_reproducible
+clean_reproducible: ${bld}/check_makefile
+#       Calling make unconditionally would cause infinite recursion, so we
+#       first check whether there is anything to remove.
+	if test -d ${bld}/reproducible -o -f ${bld}/${reproducible_os_filename}; then \
 	  unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
 	    make OS_FILENAME=${reproducible_os_filename} \
 	         BUILD_DIR=${bld}/reproducible \
@@ -125,11 +135,6 @@ clean: ${bld}/check_makefile
 	         COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
 	         clean; \
 	fi
-	for d in $$(echo ${more_built_directories} ${temp_directories} | tr ' ' '\n' | sort --reverse); do \
-          if test -e "$$d"; then \
-            rmdir "$$d"; \
-          fi; \
-        done
 
 .gitignore: ${bld}/check_makefile
 	for f in ${built_files}; do echo "/$$f"; done | sort > $@
