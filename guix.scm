@@ -31,7 +31,9 @@
              (gnu packages cdrom)
              (gnu packages compression)
              (gnu packages disk)
-             (gnu packages linux))
+             (gnu packages vim)
+             (gnu packages linux)
+             (gnu packages perl))
 
 ;; For faketime
 (use-modules (guix git-download))
@@ -106,7 +108,10 @@
         ("zip" ,zip)
         ("faketime" ,faketime)
         ("gdisk" ,gptfdisk)
-        ("column" ,util-linux)))
+        ("xxd" ,xxd)
+        ("column" ,util-linux)
+        ;; perl is needed as an extra dependency to get crc32 to work.
+        ("perl" ,perl) ("crc32" ,perl-archive-zip)))
      (description "Test framework to run an OS in multiple emulators, as a guest graphical / text shell on linux, and so on.")
      (home-page "https://github.com/jsmaniac/os-test-framework")
      (license "CC0-1.0")
