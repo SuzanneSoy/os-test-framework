@@ -70,8 +70,6 @@ ${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
 ${bld}/makefile_w_arnings: ${Makefiles}
-	test -e input-hash || printf "\033[1;31mWARNING: input-hash should be created by guix build.\033[m\n"
-
 	@unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
 	   make -n --warn-undefined-variables \
 	        OS_FILENAME=${OS_FILENAME} \

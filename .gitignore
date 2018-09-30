@@ -5,9 +5,8 @@
 /build/check_makefile
 /build/check_makefile_targets
 /build/check_makefile_w_arnings
-/build/gpt_disk_guid
-/build/gpt_partition_guid
-/build/input-hash
+/build/gpt_guid1
+/build/gpt_guid2
 /build/iso_files/boot/iso_boot.sys
 /build/iso_files/os.zip
 /build/makefile_built_directories
@@ -88,6 +87,8 @@
 /build/os.offsets.hex
 /build/os.reasm
 /build/os.reasm.asm
+/build/os_with_guid_0
+/build/os_with_guid_hash
 /build/os.zip
 /build/os.zip.adjusted
 /build/test_pass/emu_bochs
