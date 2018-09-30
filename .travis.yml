@@ -3,6 +3,7 @@ language: c
 addons:
   apt:
     packages: &common_apt_packages
+      - guix
       # graphical environment
       - scrot
       - twm

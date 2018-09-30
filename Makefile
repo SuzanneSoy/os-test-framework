@@ -20,6 +20,11 @@ tests_emu = test/qemu-system-i386-floppy test/qemu-system-i386-cdrom test/qemu-s
 tests_requiring_sudo = test/fat12_mount test/iso_mount
 tests_noemu = test/zip test/os.reasm test/sizes test/fat12_contents test/reproducible_build
 
+.DEFAULT_GOAL := all
+.PHONY: all
+all:
+	cp -f "$$(guix build --check -f guix.scm)/bin/$$(basename "${os_filename}")" "${os_filename}"
+
 # We truncate the timezone, because the Darwin version of date seems to lack
 # the %:z format (for ±HH:MM timezone).
 define date_command
@@ -52,10 +57,10 @@ include Makefile.test-example-os
 
 more_built_directories = ${built_directories} ${bld}
 
-.PHONY: all
-# all: os.arm.disasm
-all: .gitignore \
-     ${bld}/check_makefile
+.PHONY: in-guix
+# in-guix: os.arm.disasm
+in-guix: .gitignore \
+         ${bld}/check_makefile
 
 ${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}

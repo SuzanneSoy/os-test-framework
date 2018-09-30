@@ -1,5 +1,7 @@
 # Travis test harness for hobby operating systems
 
+The guix.scm file is a build recipe for os-test-framework, for the Guix package manager. This file is released under the GNU GPL version 3 or later, because it calls other recipies and library functions which are under the GPL. Other files (with the exception of `guix.scm-gpl-license` and `LICENSE.txt`) are released using the CC0 public domain dedication.
+
 This Travis configuration runs an operating system in various emulators. It can execute a SikuliX test script to ensure that some elements are visible on-screen, send keystrokes and mouse events, and interact with the OS GUI in an automated way. Finally, it will take screenshots of the operating system, and upload them to a separate repository hosting these artifacts.
 
 Below are screenshots of an example operating system. This example merely displays a gradient and does not process any user input.
