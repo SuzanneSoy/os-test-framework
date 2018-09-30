@@ -81,7 +81,7 @@
         (delete 'patch-shebangs)
         (delete 'strip))
       #:parallel-build? #t
-      #:make-flags '("COMMIT_TIMESTAMP_ISO_8601=1970-01-01T00:00:00+00:00")))
+      #:make-flags '("in-guix" "COMMIT_TIMESTAMP_ISO_8601=1970-01-01T00:00:00+00:00")))
    (native-inputs
     `(("nasm" ,nasm)
       ("which" ,which)

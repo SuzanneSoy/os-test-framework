@@ -73,17 +73,17 @@ os_partition_size_sectors = 717 # 720 - start
 os_floppy_chs_h = 2
 os_floppy_chs_s = 9
 
-all: ${os_filename} \
-     ${bld}/os.ndisasm.disasm \
-     ${bld}/os.reasm.asm \
-     ${bld}/os.file \
-     ${bld}/os.gdisk \
-     ${bld}/os.offsets.hex \
-     ${bld}/os.offsets.dec \
-     ${bld}/os.hex_with_offsets \
-     ${more_offset_dec} \
-     ${more_offset_hex} \
-     ${bld}/check_makefile
+in-guix: ${os_filename} \
+         ${bld}/os.ndisasm.disasm \
+         ${bld}/os.reasm.asm \
+         ${bld}/os.file \
+         ${bld}/os.gdisk \
+         ${bld}/os.offsets.hex \
+         ${bld}/os.offsets.dec \
+         ${bld}/os.hex_with_offsets \
+         ${more_offset_dec} \
+         ${more_offset_hex} \
+         ${bld}/check_makefile
 
 # 32k header of the ISO9660 image
 ${bld}/os.32k: example-os/os.asm ${bld}/check_makefile
