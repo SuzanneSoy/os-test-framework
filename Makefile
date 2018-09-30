@@ -34,8 +34,8 @@ define date_command
     date -d ${1} ${2}; \
   fi
 endef
-commit_timestamp = "$$(${call date_command,"${COMMIT_TIMESTAMP_ISO_8601}",'+%Y%m%d%H%m.%S'})"
-commit_timestamp_iso_8601 = ${COMMIT_TIMESTAMP_ISO_8601}
+real_commit_timestamp_iso_8601 = $$(if test "${COMMIT_TIMESTAMP_ISO_8601}" = "FILE"; then cat COMMIT_TIMESTAMP; else echo "${COMMIT_TIMESTAMP_ISO_8601}"; fi)
+commit_timestamp = "$$(${call date_command,"${real_commit_timestamp_iso_8601}",'+%Y%m%d%H%m.%S'})"
 
 reproducible_os_filename="${bld}/reproduced_$$(basename "${os_filename}")"
 
@@ -50,7 +50,8 @@ built_files += ${bld}/check_makefile \
                ${bld}/makefile_non_file_targets \
                ${bld}/makefile_phony \
                ${bld}/makefile_targets \
-               ${bld}/makefile_w_arnings
+               ${bld}/makefile_w_arnings \
+               COMMIT_TIMESTAMP
 
 include Makefile.example-os
 include Makefile.test-example-os
@@ -62,6 +63,9 @@ more_built_directories = ${built_directories} ${bld}
 in-guix: .gitignore \
          ${bld}/check_makefile
 
+COMMIT_TIMESTAMP:
+	echo "This file is injected by the Guix build recipe."
+
 ${bld}/makefile_w_arnings: | $${@D}
 ${built_files}: | $${@D}
 
@@ -71,7 +75,7 @@ ${bld}/makefile_w_arnings: ${Makefiles}
 	        OS_FILENAME=${OS_FILENAME} \
 	        BUILD_DIR=${BUILD_DIR} \
 	        SCREENSHOTS_DIR=${SCREENSHOTS_DIR} \
-	        COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	        COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	        test 2>$@ 1>/dev/null \
 	 || cat $@
 
@@ -92,7 +96,7 @@ ${bld}/makefile_database: ${Makefiles} ${bld}/check_makefile_w_arnings
 	        OS_FILENAME=${OS_FILENAME} \
 	        BUILD_DIR=${BUILD_DIR} \
 	        SCREENSHOTS_DIR=${SCREENSHOTS_DIR} \
-	        COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	        COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	 | sed -n -e '/^# Make data base,/,$$p' > $@
 
 ${bld}/makefile_database_files: ${bld}/makefile_database ${bld}/check_makefile_w_arnings
@@ -138,7 +142,7 @@ clean_reproducible: ${bld}/check_makefile
 	    make OS_FILENAME=${reproducible_os_filename} \
 	         BUILD_DIR=${bld}/reproducible \
 	         SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
-	         COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	         COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	         clean; \
 	fi
 
@@ -158,13 +162,13 @@ ${bld}/test_pass/noemu_reproducible_build: ${os_filename} ${bld}/os.hex_with_off
 	  make OS_FILENAME=${reproducible_os_filename} \
 	       BUILD_DIR=${bld}/reproducible \
 	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
-	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	       clean
 	unset MAKEFLAGS MAKELEVEL MAKE_TERMERR MFLAGS; \
 	  make OS_FILENAME=${reproducible_os_filename} \
 	       BUILD_DIR=${bld}/reproducible \
 	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
-	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	       ${reproducible_os_filename} \
                ${bld}/reproducible/os.hex_with_offsets
 #       Check that the second build produced the same file.
@@ -186,6 +190,6 @@ ${bld}/test_pass/noemu_reproducible_build: ${os_filename} ${bld}/os.hex_with_off
 	  make OS_FILENAME=${reproducible_os_filename} \
 	       BUILD_DIR=${bld}/reproducible \
 	       SCREENSHOTS_DIR=${bld}/reproducible/screenshots \
-	       COMMIT_TIMESTAMP_ISO_8601=${COMMIT_TIMESTAMP_ISO_8601} \
+	       COMMIT_TIMESTAMP_ISO_8601=${real_commit_timestamp_iso_8601} \
 	       clean
 	touch $@

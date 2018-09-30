@@ -21,6 +21,10 @@
              (guix build-system gnu)
              (guix gexp)
              (guix)
+             (guix build utils)
+             (ice-9 popen)
+             (ice-9 rdelim)
+             (gnu packages version-control)
              (gnu packages assembly)
              (gnu packages base)
              (gnu packages mtools)
@@ -55,50 +59,65 @@
    (synopsis "")))
 
 (define-public os-test-framework
-  (package
-   (name "os-test-framework")
-   (version "0.0")
-   (build-system gnu-build-system)
-   (arguments
-    `(#:phases
-      (modify-phases %standard-phases
-        ;; unpack                ;; this phase is enabled
-        ;; patch-source-shebangs ;; this phase is enabled
-        (add-after 'patch-source-shebangs 'make-clean
-          (lambda* (#:key inputs #:allow-other-keys)
-            (invoke "make" "clean" "COMMIT_TIMESTAMP_ISO_8601=1970-01-01T00:00:00+00:00")))
-        (delete 'configure)
-        (add-before 'build 'make-.gitignore-writable
-          (lambda* (#:key inputs #:allow-other-keys)
-            (invoke "chmod" "+w" ".gitignore")))
-        ;; build                 ;; this phase is enabled
-        (delete 'check)          ;; disabled for now, will enable it later.
-        (replace 'install
-          (lambda* (#:key outputs #:allow-other-keys)
-            (let ((out (lambda (f) (string-append (assoc-ref outputs "out") f)))) ;; TODO: use path-append or something similar
-              (invoke "mkdir" "-p" (out "/bin"))
-              (invoke "cp" "os.bat" (out "/bin/os.bat")))))
-        (delete 'patch-shebangs)
-        (delete 'strip))
-      #:parallel-build? #t
-      #:make-flags '("in-guix" "COMMIT_TIMESTAMP_ISO_8601=1970-01-01T00:00:00+00:00")))
-   (native-inputs
-    `(("nasm" ,nasm)
-      ("which" ,which)
-      ("mtools" ,mtools)
-      ("mkisofs" ,xorriso)
-      ("zip" ,zip)
-      ("faketime" ,faketime)
-      ("gdisk" ,gptfdisk)
-      ("column" ,util-linux)))
-   (description "Test framework to run an OS in multiple emulators, as a guest graphical / text shell on linux, and so on.")
-   (home-page "https://github.com/jsmaniac/os-test-framework")
-   (license "CC0-1.0")
-   (source (local-file
-            (current-source-directory)
-            #:recursive? #t
-            #:select? (lambda (file stat)
-                        (not (equal? (basename file) ".git")))))
-   (synopsis "")))
+  (let ((makefile-commit-timestamp
+         '(string-append
+           "COMMIT_TIMESTAMP_ISO_8601="
+           ;; (let* ((pipe (open-input-pipe "git log -1 --pretty=format:%ad --date=iso8601-strict"))
+           ;;              (timestamp (read-line pipe)))
+           ;;         (close-pipe pipe)
+           ;;         timestamp)
+           "FILE")))
+    (package
+     (name "os-test-framework")
+     (version "0.0")
+     (build-system gnu-build-system)
+     (arguments
+      `(#:phases
+        (modify-phases %standard-phases
+          ;; unpack                ;; this phase is enabled
+          ;; patch-source-shebangs ;; this phase is enabled
+          (add-after 'patch-source-shebangs 'make-clean
+            (lambda* (#:key inputs #:allow-other-keys)
+              (invoke "cp" "COMMIT_TIMESTAMP" "COMMIT_TIMESTAMP.bak")
+              (invoke "make" "clean" ,makefile-commit-timestamp)
+              (invoke "cp" "COMMIT_TIMESTAMP.bak" "COMMIT_TIMESTAMP")))
+          (delete 'configure)
+          (add-before 'build 'make-.gitignore-writable
+            (lambda* (#:key inputs #:allow-other-keys)
+              (invoke "chmod" "+w" ".gitignore")))
+          ;; build                 ;; this phase is enabled
+          (delete 'check)          ;; disabled for now, will enable it later.
+          (replace 'install
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let ((out (lambda (f) (string-append (assoc-ref outputs "out") f)))) ;; TODO: use path-append or something similar
+                (invoke "mkdir" "-p" (out "/bin"))
+                (invoke "cp" "os.bat" (out "/bin/os.bat")))))
+          (delete 'patch-shebangs)
+          (delete 'strip))
+        #:parallel-build? #t
+        #:make-flags
+        (list "in-guix" ,makefile-commit-timestamp)))
+     (native-inputs
+      `(("git" ,git)
+        ("nasm" ,nasm)
+        ("which" ,which)
+        ("mtools" ,mtools)
+        ("mkisofs" ,xorriso)
+        ("zip" ,zip)
+        ("faketime" ,faketime)
+        ("gdisk" ,gptfdisk)
+        ("column" ,util-linux)))
+     (description "Test framework to run an OS in multiple emulators, as a guest graphical / text shell on linux, and so on.")
+     (home-page "https://github.com/jsmaniac/os-test-framework")
+     (license "CC0-1.0")
+     (source (let ()
+               (invoke "sh" "-c"
+                       "git log -1 --pretty=format:%ad --date=iso8601-strict > COMMIT_TIMESTAMP")
+               (local-file
+                (current-source-directory)
+                #:recursive? #t
+                #:select? (lambda (file stat)
+                            (not (equal? (basename file) ".git"))))))
+     (synopsis ""))))
 
 os-test-framework

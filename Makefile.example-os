@@ -103,7 +103,8 @@ ${bld}/os.iso: ${bld}/iso_files/os.zip ${bld}/iso_files/boot/iso_boot.sys ./util
 	! test -d ${bld}/iso_files.tmp
 	cp -a ${cp_T_option} -- ${bld}/iso_files ${bld}/iso_files.tmp
 	find ${bld}/iso_files.tmp -depth -exec touch -t ${commit_timestamp} '{}' ';'
-	UTILS="$$PWD/utils" ./utils/faketime.sh ${commit_timestamp_iso_8601} sh -c '(cd ./${bld}/iso_files.tmp/ && "$$UTILS/mkisofs" \
+	UTILS="$$PWD/utils" ./utils/faketime.sh ${real_commit_timestamp_iso_8601} \
+	 sh -c '(cd ./${bld}/iso_files.tmp/ && "$$UTILS/mkisofs" \
 	 --input-charset utf-8 \
 	 -rock \
 	 -joliet \
@@ -182,12 +183,12 @@ os_fat12_partition = "$@@@${bytes_fat12_start}"
 ${bld}/os.fat12: ${bld}/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} \
                  ./utils/mformat ./utils/mcopy ${bld}/check_makefile
 	set -x; dd if=/dev/zero bs=${sector_size} count=${sectors_os_size} of=$@
-	./utils/faketime.sh ${commit_timestamp_iso_8601} ./utils/mformat -v "Example OS" \
+	./utils/faketime.sh ${real_commit_timestamp_iso_8601} ./utils/mformat -v "Example OS" \
 	 -T ${sectors_fat12_size} \
 	 -h ${os_floppy_chs_h} \
 	 -s ${os_floppy_chs_s} \
 	 -i ${os_fat12_partition}
-	./utils/faketime.sh ${commit_timestamp_iso_8601} ./utils/mcopy -i ${os_fat12_partition} $< "::os.zip"
+	./utils/faketime.sh ${real_commit_timestamp_iso_8601} ./utils/mcopy -i ${os_fat12_partition} $< "::os.zip"
 
 ${bld}/iso_files/os.zip: ${bld}/os.zip ${bld}/check_makefile
 # TODO: make it so that the various file formats are mutual quines:
