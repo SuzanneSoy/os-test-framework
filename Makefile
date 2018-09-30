@@ -7,7 +7,8 @@ COMMIT_TIMESTAMP_ISO_8601 = $$(git log -1 --pretty=format:%ad --date=iso8601-str
 ####################################
 
 MAKEFLAGS = --warn-undefined-variables
-SHELL = bash -euET -o pipefail -c
+SHELL = ${CURDIR}/utils/safe-bash.sh
+# utils/safe-bash.sh
 .SECONDEXPANSION:
 
 Makefiles = Makefile Makefile.example-os Makefile.test-example-os
