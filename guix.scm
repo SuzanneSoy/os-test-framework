@@ -25,6 +25,8 @@
              (ice-9 popen)
              (ice-9 rdelim)
              (gnu packages version-control)
+             (gnu packages vim)
+             (gnu packages package-management)
              (gnu packages assembly)
              (gnu packages base)
              (gnu packages mtools)
@@ -75,6 +77,17 @@
       `(#:phases
         (modify-phases %standard-phases
           ;; unpack                ;; this phase is enabled
+          (add-after 'unpack 'compute-input-hash
+            (lambda* (#:key inputs #:allow-other-keys)
+              (invoke "sh" "-c"
+                (string-append
+                 "   guix hash -rx . --format=base32"
+                 " | tr '[:lower:]' '[:upper:]'"
+                 " | head -c 48"
+                 " | base32 -d"
+                 " | xxd -ps"
+                 " | head -c 60"
+                 " > input-hash"))))
           ;; patch-source-shebangs ;; this phase is enabled
           (add-after 'patch-source-shebangs 'make-clean
             (lambda* (#:key inputs #:allow-other-keys)
@@ -99,6 +112,8 @@
         (list "in-guix" ,makefile-commit-timestamp)))
      (native-inputs
       `(("git" ,git)
+        ("xxd" ,xxd)
+        ("guix" ,guix)
         ("nasm" ,nasm)
         ("which" ,which)
         ("mtools" ,mtools)
