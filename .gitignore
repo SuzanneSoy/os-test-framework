@@ -89,6 +89,9 @@
 /build/os.reasm.asm
 /build/os_with_guid_0
 /build/os_with_guid_hash
+/build/os_with_guid_hash.fixed_gpt_crc
+/build/os_with_guid_hash.gpt_header_fixed_crc
+/build/os_with_guid_hash.partition_array
 /build/os.zip
 /build/os.zip.adjusted
 /build/test_pass/emu_bochs

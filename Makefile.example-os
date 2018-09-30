@@ -55,6 +55,9 @@ built_files += ${os_filename} \
                ${bld}/gpt_guid2 \
                ${bld}/os_with_guid_0 \
                ${bld}/os_with_guid_hash \
+               ${bld}/os_with_guid_hash.partition_array \
+               ${bld}/os_with_guid_hash.gpt_header_fixed_crc \
+               ${bld}/os_with_guid_hash.fixed_gpt_crc \
                ${more_offset_dec} \
                ${more_offset_hex} \
 
@@ -301,7 +304,43 @@ ${bld}/os_with_guid_hash: ${bld}/os_with_guid_0 \
 	  printf "\r\n:: %02x" $$i | dd bs=1 seek=$$(( 1024 + ( ($$i) - 1) * 128 + 16)) count=7 conv=notrunc of=$@; \
 	  printf "\r\n:: %02x" $$i | dd bs=1 seek=$$(( ${bytes_gpt_mirror_start} + ( ($$i) - 1) * 128 + 16)) count=7 conv=notrunc of=$@; \
 	done
-${os_filename}: ${bld}/os_with_guid_hash ${bld}/os.zip.adjusted \
+
+%.partition_array: % ${bld}/check_makefile
+# Extract the partition array header
+	dd if=$< bs=512 skip=2 count=32 of=$@
+
+# The GPT header of the given disk image, with its CRC adjusted to the actual
+# data. It is used to fix the CRC after injecting MS-DOS comments in ignored
+# parts of the partition array.
+%.gpt_header_fixed_crc: % %.partition_array % ${bld}/check_makefile
+# Extract the GPT header
+	dd if=$< bs=512 skip=1 count=1 of=$@
+# * Compute the CRC32 of the particion array
+# * Convert endianness
+# * Convert to binary
+# * Inject into the GPT header
+	  crc32 $*.partition_array \
+	| sed -e 's/^\(..\)\(..\)\(..\)\(..\)$$/\4\3\2\1/' \
+	| xxd -r -ps \
+	| dd bs=1 seek=88 count=4 conv=notrunc of=$@
+# Zero-out the CRC of the header itself
+	printf '00000000' | xxd -r -ps | dd bs=1 seek=16 count=4 conv=notrunc of=$@
+# * Compute the CRC32 of the GPT header (with the CRC field itself zeroed out)
+# * Convert endianness
+# * Convert to binary
+# * Inject into the GPT header
+	  crc32 $@ \
+	| sed -e 's/^\(..\)\(..\)\(..\)\(..\)$$/\4\3\2\1/' \
+	| xxd -r -ps \
+	| dd bs=1 seek=16 count=4 conv=notrunc of=$@
+
+%.fixed_gpt_crc: % %.gpt_header_fixed_crc \
+                 ${bld}/check_makefile
+	cp $< $@
+# Inject the fixed GPT header
+	dd if=$*.gpt_header_fixed_crc bs=512 seek=1 count=1 conv=notrunc of=$@
+
+${os_filename}: ${bld}/os_with_guid_hash.fixed_gpt_crc ${bld}/os.zip.adjusted \
                 ${dep_bytes_zip_start} \
                 ${bld}/check_makefile
 	cp -f $< $@
