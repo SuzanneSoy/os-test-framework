@@ -219,7 +219,7 @@ ${eval ${call offset,bytes_fat12_end,        $${bytes_fat12_start} + $${bytes_fa
 ${eval ${call offset,bytes_gpt_mirror_size,  $${sectors_gpt_mirror_size} + $${sector_size},              sectors_gpt_mirror_size,}}
 ${eval ${call offset,bytes_gpt_mirror_end,   $${bytes_fat12_end} + $${bytes_gpt_mirror_size},            bytes_fat12_end bytes_gpt_mirror_size,}}
 ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes_gpt_mirror_size},       bytes_gpt_mirror_end bytes_gpt_mirror_size,}}
-${eval ${call offset,bytes_zip_end,          $${bytes_os_size},,                                         }}
+${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                                          bytes_os_size,}}
 
 os_fat12_partition = "$@@@${bytes_fat12_start}"
 build/os.fat12: build/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} build/check_makefile
