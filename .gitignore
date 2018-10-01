@@ -96,6 +96,7 @@
 /build/test_pass/emu_virtualbox
 /build/test_pass/noemu_fat12_contents
 /build/test_pass/noemu_os.reasm
+/build/test_pass/noemu_reproducible_build
 /build/test_pass/noemu_sizes
 /build/test_pass/noemu_zip
 /build/test_pass/sudo_fat12_mount
@@ -117,3 +118,6 @@
 /deploy-screenshots/virtualbox-anim.gif
 /deploy-screenshots/virtualbox.png
 /os.bat
+/utils/mcopy
+/utils/mformat
+/utils/mkisofs
