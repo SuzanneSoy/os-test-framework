@@ -13,6 +13,10 @@ SHELL = ${CURDIR}/utils/safe-bash.sh
 
 Makefiles = Makefile Makefile.example-os Makefile.test-example-os
 
+# Avoid hardcoding the name of the OS. A name change is frequent (during early
+# development, and when the project is forked), and is often costly.
+os_name = Example OS
+
 os_filename  = ${OS_FILENAME}
 bld          = ${BUILD_DIR}
 screenshots  = ${SCREENSHOTS_DIR}
