@@ -8,19 +8,19 @@ offset_names = bytes_os_size \
                bytes_iso_end \
                bytes_fat12_start \
                bytes_fat12_end \
+               bytes_zip_size \
                bytes_zip_start \
                bytes_zip_end \
                zip_byte_before_gpt \
+               bytes_gpt_mirror_size \
                bytes_gpt_mirror_start \
-               bytes_gpt_mirror_end \
-               bytes_gpt_header_mirror_start
+               bytes_gpt_header_mirror_start \
+               bytes_gpt_mirror_end
 
 more_offset_names = ${offset_names} \
                     bytes_fat12_size \
-                    bytes_gpt_mirror_size \
                     bytes_header_32k_size \
                     bytes_iso_size \
-                    bytes_zip_size \
                     sectors_fat12_size \
                     sectors_fat12_start \
                     sectors_gpt_mirror_size \
