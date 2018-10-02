@@ -8,11 +8,12 @@ offset_names = bytes_os_size \
                bytes_iso_end \
                bytes_fat12_start \
                bytes_fat12_end \
+               bytes_zip_start \
+               bytes_zip_end \
+               zip_byte_before_gpt \
                bytes_gpt_mirror_start \
                bytes_gpt_mirror_end \
-               bytes_gpt_header_mirror_start \
-               bytes_zip_start \
-               bytes_zip_end
+               bytes_gpt_header_mirror_start
 
 more_offset_names = ${offset_names} \
                     bytes_fat12_size \
@@ -60,6 +61,7 @@ built_files += ${os_filename} \
                ${bld}/os_with_guid_hash.partition_array \
                ${bld}/os_with_guid_hash.gpt_header_fixed_crc \
                ${bld}/os_with_guid_hash.fixed_gpt_crc \
+               ${bld}/zip_comment \
                ${more_offset_dec} \
                ${more_offset_hex} \
 
@@ -187,10 +189,12 @@ ${eval ${call offset,bytes_fat12_size,       $${sectors_fat12_size} * $${sector_
 ${eval ${call offset,bytes_fat12_end,        $${bytes_fat12_start} + $${bytes_fat12_size},               bytes_fat12_start bytes_fat12_size,}}
 # It is probably not necessary to align the GPT mirror end on a track boundary.
 ${eval ${call offset,bytes_gpt_mirror_size,  $${sectors_gpt_mirror_size} * $${sector_size},              sectors_gpt_mirror_size,}}
-${eval ${call offset,bytes_gpt_mirror_end,   $${bytes_fat12_end} + $${bytes_gpt_mirror_size},            bytes_fat12_end bytes_gpt_mirror_size,}}
+${eval ${call offset,bytes_gpt_mirror_end,   $${bytes_os_size},                                          bytes_os_size,}}
 ${eval ${call offset,bytes_gpt_header_mirror_start, $${bytes_gpt_mirror_end} - $${sector_size},          bytes_gpt_mirror_end,}}
 ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes_gpt_mirror_size},       bytes_gpt_mirror_end bytes_gpt_mirror_size,}}
 ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                                          bytes_os_size,}}
+${eval ${call offset,zip_byte_before_gpt,    $${bytes_gpt_mirror_start} - 1,                             bytes_gpt_mirror_start,}}
+
 
 os_fat12_partition = "$@@@${bytes_fat12_start}"
 ${bld}/os.fat12: ${bld}/os.zip ${dep_bytes_fat12_size} ${dep_bytes_fat12_start} ${dep_sectors_os_size} \
@@ -216,21 +220,42 @@ ${bld}/iso_files/boot/iso_boot.sys: ${bld}/os.32k ${bld}/check_makefile
 #       see https://wiki.osdev.org/El-Torito#A_BareBones_Boot_Image_with_Boot_Information_Table
 	dd if=$< bs=512 count=4 of=$@
 
-${bld}/os.zip: ${bld}/os.32k ${bld}/check_makefile
+${bld}/zip_comment: ${dep_bytes_gpt_mirror_size} ${bld}/check_makefile
+#	Reserve enough space for the secondary GPT.
+#
+#	The X will be replaced by a 0x00 byte after the zip is created and
+#	adjusted, because the zip utility otherwise truncates the archive
+#	comment.
+#
+#       It seems that the zip utility injects extra '\r\n' line endings after
+#       every 256 characters, which changes the total length of the
+#       comment. We therefore insert a \n directly (zip seems to convert line
+#       endings from Unix \n to DOS \r\n), and aim for the exact desired size.
+	(printf "%sX\n" '${os_name}'; \
+	 for i in $$(seq $$((${sectors_gpt_mirror_size} * 2))); do \
+	   printf "%254s\n" ''; \
+	 done) > $@
+
+${bld}/os.zip: ${bld}/os.32k ${bld}/zip_comment ${bld}/check_makefile
 #	We copy os.32k and alter its timestamp to ensure reproducible
 #	builds.
 	mkdir -p ${bld}/os.32k.tmp
 	cp -a $< ${bld}/os.32k.tmp/os.32k
 	touch -t ${commit_timestamp} ${bld}/os.32k.tmp/os.32k
-	(cd ${bld}/os.32k.tmp/ && zip -X ../os.zip os.32k)
+#	If there is already an archive present from a previous build, zip
+#	risks trying to update it, so we have to delete it if it exists.
+	rm -f $@
+	(cd ${bld}/os.32k.tmp/ && zip -X --archive-comment ../os.zip os.32k < ../zip_comment)
 	rm ${bld}/os.32k.tmp/os.32k
 	rmdir ${bld}/os.32k.tmp
 
-${bld}/os.zip.adjusted: ${bld}/os.zip ${dep_bytes_zip_start} ${bld}/check_makefile
-# TODO: the ZIP file can end with a variable-length comment, this would allow us to hide the GPT mirrors.
+${bld}/os.zip.adjusted: ${bld}/os.zip ${dep_bytes_zip_start} ${dep_zip_byte_before_gpt} ${bld}/check_makefile
 	set -x; dd if=/dev/zero bs=1 count=${bytes_zip_start} of=$@
 	cat $< >> $@
 	zip --adjust-sfx $@
+#	Mark the end of the real ZIP comment, so that the rest is not printed.
+#	The rest of the comment contains the GPT mirror.
+	set -x; dd if=/dev/zero bs=1 count=1 conv=notrunc seek=${zip_byte_before_gpt} of=$@
 
 gdisk_pipe_commands_slowly=while read str; do echo "$$str"; printf "\033[1;33m%s\033[m\n" "$$str" >&2; sleep 0.01; done
 
@@ -245,7 +270,7 @@ ${bld}/gpt_guid%: ${bld}/os_with_guid_0 ${bld}/check_makefile
 gpt_disk_guid=${bld}/gpt_guid1
 gpt_partition_guid=${bld}/gpt_guid2
 
-${bld}/os_with_guid_0: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 \
+${bld}/os_with_guid_0: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 ${bld}/os.zip.adjusted \
                        ${dep_bytes_header_32k_start} \
                        ${dep_bytes_header_32k_size} \
                        ${dep_bytes_fat12_start} \
@@ -254,6 +279,7 @@ ${bld}/os_with_guid_0: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 \
                        ${dep_bytes_gpt_mirror_end} \
                        ${dep_sectors_fat12_start} \
                        ${dep_sectors_fat12_size} \
+                       ${dep_bytes_zip_start} \
                        ${bld}/check_makefile
 	rm -f $@
 # start with the .iso
@@ -262,8 +288,8 @@ ${bld}/os_with_guid_0: ${bld}/os.32k ${bld}/os.iso ${bld}/os.fat12 \
 	set -x; dd skip=${bytes_header_32k_start} seek=${bytes_header_32k_start} bs=1 count=${bytes_header_32k_size} conv=notrunc if=${bld}/os.32k of=$@
 # splice in fat12
 	set -x; dd skip=${bytes_fat12_start} seek=${bytes_fat12_start} bs=1 count=${bytes_fat12_size} conv=notrunc if=${bld}/os.fat12 of=$@
-# pad with zeroes to prepare for GPT table
-	set -x; dd if=/dev/zero seek=$$((${bytes_gpt_mirror_end} - 1 )) bs=1 count=1 conv=notrunc of=$@
+# splice in zip at the end
+	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=${bld}/os.zip.adjusted of=$@
 # patch the partition table
 # Thanks to https://wiki.gentoo.org/wiki/Hybrid_partition_table for showing that gdisk can be used to make a hybrid MBR / GPT.
 #       gdisk commands:
@@ -349,12 +375,8 @@ ${bld}/os_with_guid_hash: ${bld}/os_with_guid_0 \
 #	Inject the fixed GPT header in the mirror
 	dd if=$*.gpt_header_fixed_crc bs=1 seek=${bytes_gpt_header_mirror_start} count=${sector_size} conv=notrunc of=$@
 
-${os_filename}: ${bld}/os_with_guid_hash.fixed_gpt_crc ${bld}/os.zip.adjusted \
-                ${dep_bytes_zip_start} \
-                ${bld}/check_makefile
+${os_filename}: ${bld}/os_with_guid_hash.fixed_gpt_crc ${bld}/check_makefile
 	cp -f $< $@
-# splice in zip at the end
-	set -x; dd skip=${bytes_zip_start} seek=${bytes_zip_start} bs=1 conv=notrunc if=${bld}/os.zip.adjusted of=$@
 	chmod a+x-w $@
 
 ${bld}/os.file: ${os_filename} ${bld}/check_makefile
