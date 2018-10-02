@@ -1,6 +1,7 @@
 offset_names = bytes_os_size \
                bytes_mbr_start \
                bytes_mbr_end \
+               bytes_gpt_header_start \
                bytes_header_32k_start \
                bytes_header_32k_end \
                bytes_iso_start \
@@ -9,6 +10,7 @@ offset_names = bytes_os_size \
                bytes_fat12_end \
                bytes_gpt_mirror_start \
                bytes_gpt_mirror_end \
+               bytes_gpt_header_mirror_start \
                bytes_zip_start \
                bytes_zip_end
 
@@ -148,6 +150,9 @@ ${eval ${call offset,bytes_os_size,     $${os_image_size_kb} * 1024,,           
 ${eval ${call offset,sectors_os_size,   $${bytes_os_size}    / $${sector_size},                        bytes_os_size,}}
 ${eval ${call offset,tracks_os_size,    $${sectors_os_size}  / $${os_floppy_chs_s},                    sectors_os_size,}}
 
+# Primary GPT
+${eval ${call offset,bytes_gpt_header_start, $${sector_size},,                                         }}
+
 # round up
 ${eval ${call offset,bytes_iso_size,    $$$$(utils/file-length.sh -c ${bld}/os.iso),             ,${bld}/os.iso}}
 ${eval ${call offset,sectors_iso_size,  ${call div_round_up,$${bytes_iso_size},$${sector_size}},       bytes_iso_size,}}
@@ -183,6 +188,7 @@ ${eval ${call offset,bytes_fat12_end,        $${bytes_fat12_start} + $${bytes_fa
 # It is probably not necessary to align the GPT mirror end on a track boundary.
 ${eval ${call offset,bytes_gpt_mirror_size,  $${sectors_gpt_mirror_size} * $${sector_size},              sectors_gpt_mirror_size,}}
 ${eval ${call offset,bytes_gpt_mirror_end,   $${bytes_fat12_end} + $${bytes_gpt_mirror_size},            bytes_fat12_end bytes_gpt_mirror_size,}}
+${eval ${call offset,bytes_gpt_header_mirror_start, $${bytes_gpt_mirror_end} - $${sector_size},          bytes_gpt_mirror_end,}}
 ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes_gpt_mirror_size},       bytes_gpt_mirror_end bytes_gpt_mirror_size,}}
 ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                                          bytes_os_size,}}
 
@@ -335,10 +341,13 @@ ${bld}/os_with_guid_hash: ${bld}/os_with_guid_0 \
 	| dd bs=1 seek=16 count=4 conv=notrunc of=$@
 
 %.fixed_gpt_crc: % %.gpt_header_fixed_crc \
+                 ${dep_bytes_gpt_header_start} ${dep_bytes_gpt_header_mirror_start} \
                  ${bld}/check_makefile
 	cp $< $@
-# Inject the fixed GPT header
-	dd if=$*.gpt_header_fixed_crc bs=512 seek=1 count=1 conv=notrunc of=$@
+#	Inject the fixed GPT header
+	dd if=$*.gpt_header_fixed_crc bs=1 seek=${bytes_gpt_header_start}        count=${sector_size} conv=notrunc of=$@
+#	Inject the fixed GPT header in the mirror
+	dd if=$*.gpt_header_fixed_crc bs=1 seek=${bytes_gpt_header_mirror_start} count=${sector_size} conv=notrunc of=$@
 
 ${os_filename}: ${bld}/os_with_guid_hash.fixed_gpt_crc ${bld}/os.zip.adjusted \
                 ${dep_bytes_zip_start} \
