@@ -3,7 +3,6 @@ language: c
 addons:
   apt:
     packages: &common_apt_packages
-      - guix
       # graphical environment
       - scrot
       - twm
@@ -25,6 +24,25 @@ addons:
       - genisoimage
       - faketime
 
+before_install:
+  - gpg --keyserver pgp.mit.edu --recv-keys 3CE464558A84FDC69DB40CFB090B11993D9AEBB5 || gpg --keyserver keys.gnupg.net --recv-keys 3CE464558A84FDC69DB40CFB090B11993D9AEBB5
+  - wget https://alpha.gnu.org/gnu/guix/guix-binary-0.15.0.x86_64-linux.tar.xz.sig
+  - wget https://alpha.gnu.org/gnu/guix/guix-binary-0.15.0.x86_64-linux.tar.xz
+  - gpg --verify guix-binary-0.15.0.x86_64-linux.tar.xz.sig
+  - sudo tar -Jxf guix-binary-0.15.0.x86_64-linux.tar.xz && sudo mv var/guix /var && sudo mv gnu /
+  - ln --no-dereference --symbolic /var/guix/profiles/per-user/root/guix-profile "$PWD/guix-profile"
+  - GUIX_PROFILE="$PWD/guix-profile"
+  - source "$GUIX_PROFILE/etc/profile"; echo $PATH
+  - echo; echo $PATH
+  - sudo groupadd --system guixbuild
+  # --groups kvm
+  - for i in 01 02 03 04 05 06 07 08 09 10; do sudo useradd "guixbuilder$i" --gid guixbuild --groups guixbuild --home-dir /dev/null/nowhere --comment "Guix build user $i" --shell $(which nologin) --system; done
+  - sudo "$GUIX_PROFILE/bin/guix-daemon" --build-users-group=guixbuild --max-jobs=10 &
+  - sleep 5 # TODO…
+  - echo; echo $PATH
+  - cat "$GUIX_PROFILE/share/guix/hydra.gnu.org.pub" | sudo su -c "source '$GUIX_PROFILE/etc/profile'; guix archive --authorize"
+  - guix package -i hello
+
 matrix:
   include:
     - os: linux
@@ -42,14 +60,14 @@ matrix:
             - dosbox
     - os: linux
       env: MODE=gui-sh
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
             - *common_apt_packages
     - os: linux
       env: MODE=dosbox
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
@@ -66,7 +84,7 @@ matrix:
       script: make all test/noemu test/macos
     - os: linux
       env: MODE=qemu-system-i386-floppy
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
@@ -75,7 +93,7 @@ matrix:
             - qemu-system-x86
     - os: linux
       env: MODE=qemu-system-i386-cdrom
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
@@ -84,7 +102,7 @@ matrix:
             - qemu-system-x86
     - os: linux
       env: MODE=qemu-system-arm
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
@@ -102,7 +120,7 @@ matrix:
             #- virtualbox
     - os: linux
       env: MODE=bochs
-      sudo: false
+      sudo: true # false
       addons:
         apt:
           packages:
