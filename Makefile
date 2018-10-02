@@ -292,7 +292,7 @@ ${eval ${call offset,sectors_fat12_start,    $${bytes_fat12_start} / $${sector_s
 ${eval ${call offset,bytes_fat12_size,       $${sectors_fat12_size} * $${sector_size},                   sectors_fat12_size,}}
 ${eval ${call offset,bytes_fat12_end,        $${bytes_fat12_start} + $${bytes_fat12_size},               bytes_fat12_start bytes_fat12_size,}}
 # It is probably not necessary to align the GPT mirror end on a track boundary.
-${eval ${call offset,bytes_gpt_mirror_size,  $${sectors_gpt_mirror_size} + $${sector_size},              sectors_gpt_mirror_size,}}
+${eval ${call offset,bytes_gpt_mirror_size,  $${sectors_gpt_mirror_size} * $${sector_size},              sectors_gpt_mirror_size,}}
 ${eval ${call offset,bytes_gpt_mirror_end,   $${bytes_fat12_end} + $${bytes_gpt_mirror_size},            bytes_fat12_end bytes_gpt_mirror_size,}}
 ${eval ${call offset,bytes_gpt_mirror_start, $${bytes_gpt_mirror_end} - $${bytes_gpt_mirror_size},       bytes_gpt_mirror_end bytes_gpt_mirror_size,}}
 ${eval ${call offset,bytes_zip_end,          $${bytes_os_size},                                          bytes_os_size,}}
